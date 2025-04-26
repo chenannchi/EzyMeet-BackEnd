@@ -1,9 +1,12 @@
 package EzyMeet.EzyMeet.config;
 
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.firestore.Firestore;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -11,14 +14,17 @@ import java.io.InputStream;
 
 @Configuration
 public class FirebaseConfig {
+    private static final Logger logger = LoggerFactory.getLogger(FirebaseConfig.class);
+
 
     @Bean
     public FirebaseApp firebaseApp() throws Exception {
         // 從 classpath 載入 service account
         InputStream serviceAccount =
                 this.getClass().getClassLoader()
-                        .getResourceAsStream("firebase-service-account.json");
+                        .getResourceAsStream("firebase/ezymeet-key.json");
         if (serviceAccount == null) {
+            logger.error("找不到 firebase key 文件");
             throw new IllegalStateException("找不到 firebase-service-account.json");
         }
 
@@ -29,47 +35,20 @@ public class FirebaseConfig {
                 .build();
 
         // 避免重複初始化
+
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseApp.initializeApp(options);
+            logger.info("Firebase has been initialized successfully");
+        } else {
+            logger.info("Firebase is already initialized");
         }
         return FirebaseApp.getInstance();
     }
 
     @Bean
-    public FirestoreClient firestoreClient(FirebaseApp app) {
+    public Firestore firestoreClient(FirebaseApp app) {
         // FirestoreClient 其實是 static 單例，但我們依然可以透過 Bean 注入
-        return FirestoreClient.getInstance();
+        logger.info("Firestore client created");
+        return FirestoreClient.getFirestore(app);
     }
 }
-
-
-//package EzyMeet.EzyMeet.config;
-//
-//import com.google.auth.oauth2.GoogleCredentials;
-//import com.google.cloud.firestore.Firestore;
-//import org.springframework.context.annotation.Bean;
-//import org.springframework.context.annotation.Configuration;
-//
-//import java.io.FileInputStream;
-//import java.io.InputStream;
-//
-//import com.google.firebase.FirebaseApp;
-//import com.google.firebase.FirebaseOptions;
-//
-//@Configuration
-//public class FirebaseConfig {
-//
-//    @Bean
-//    public Firestore initializeFirestore() throws Exception {
-//        InputStream serviceAccount = new FileInputStream("firebase/ezymeet-key.json");
-//        GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
-//        FirebaseOptions options = new FirebaseOptions.Builder()
-//                .setCredentials(credentials)
-//                .build();
-//        FirebaseApp.initializeApp(options);
-//
-//        return FirestoreClient.getFirestore();
-//    }
-//}
-
-
