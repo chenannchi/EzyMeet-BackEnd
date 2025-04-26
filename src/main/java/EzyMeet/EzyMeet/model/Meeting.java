@@ -1,6 +1,9 @@
 package EzyMeet.EzyMeet.model;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
+
 @Getter
 @Setter
 public class Meeting {
@@ -9,6 +12,6 @@ public class Meeting {
     private TimeSlot timeslot;
     private String location;
     private String link;
-    private MeetingParticipant[] invitees;
+    private List<MeetingParticipant> invitees;
     private String description;
 }

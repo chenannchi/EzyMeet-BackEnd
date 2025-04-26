@@ -1,23 +1,24 @@
 package EzyMeet.EzyMeet.model;
+import com.google.cloud.Timestamp;
 import jakarta.persistence.Id;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.cglib.core.Local;
-
-import java.time.LocalDateTime;
 import java.util.Date;
+
 import java.util.UUID;
 
 @Getter
 @Setter
+@NoArgsConstructor
 public class TimeSlot {
     private UUID id;
-    private LocalDateTime startDate;
-    private LocalDateTime endDate;
+    private Date startDate;
+    private Date endDate;
 
-    public TimeSlot() {}
 
-    public TimeSlot(LocalDateTime startDateTime, LocalDateTime endDateTime) {
+    public TimeSlot(Date startDateTime, Date endDateTime) {
         this.startDate = startDateTime;
         this.endDate = endDateTime;
     }
