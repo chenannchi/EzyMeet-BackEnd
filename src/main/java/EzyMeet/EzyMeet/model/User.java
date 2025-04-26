@@ -7,13 +7,14 @@ import java.util.UUID;
 
 @Getter
 public class User{
-    private UUID id;
-    private UUID googleId;
+    private String id;
+    private String googleId;
     private String userName;
     private String email;
 
-    public User(UUID id, String name, String email) {
+    public User(String id, String googleId, String name, String email) {
         this.id = id;
+        this.googleId = googleId;
         this.userName = name;
         this.email = email;
     }

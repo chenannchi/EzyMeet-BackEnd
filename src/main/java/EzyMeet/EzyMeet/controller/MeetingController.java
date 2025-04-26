@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/meetings")
+@CrossOrigin(origins = "http://localhost:3000")
 public class MeetingController {
 
     private final MeetingService meetingService;
@@ -25,6 +26,7 @@ public class MeetingController {
     @PostMapping("/create")
     public ResponseEntity<Meeting> createMeeting(@RequestBody Meeting meeting) {
         //如果 JSON 中缺少某個字段（如 id），相應的對象屬性會被設為 null（對於 Long 等引用類型）
+
         Meeting createdMeeting = meetingService.createMeeting(meeting);
         return ResponseEntity.ok(createdMeeting);
     }
