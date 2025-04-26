@@ -1,8 +1,5 @@
 package EzyMeet.EzyMeet.controller;
 
-import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.WriteResult;
 import org.slf4j.Logger;
@@ -12,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
+
 @RestController
 @RequestMapping("/firestore-test")
 public class FirebaseTestController {
@@ -24,6 +21,11 @@ public class FirebaseTestController {
     @Autowired
     public FirebaseTestController(Firestore firestore) {
         this.firestore = firestore;
+    }
+
+    @GetMapping("/ping")
+    public String ping() {
+        return "Firebase Firestore is up and running!";
     }
 
     @PostMapping("/create")
