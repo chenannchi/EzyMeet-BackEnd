@@ -9,8 +9,10 @@ import java.time.LocalDateTime;
 public class Meeting {
     private Long id;
     private String title;
-    private String description;
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
+    private String label;
+    private TimeSlot timeslot;
     private String location;
+    private String link;
+    private String[] invitees;
+    private String description;
 }
