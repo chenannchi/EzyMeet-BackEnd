@@ -1,5 +1,6 @@
 package EzyMeet.EzyMeet.model;
 
+import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +13,7 @@ public class MeetingParticipant {
     @Getter
     private UUID userId;
     @Getter
-    private UUID meetingId;
+    private String meetingId;
     @Setter
     @Getter
     private Status status;
@@ -23,11 +24,12 @@ public class MeetingParticipant {
         DECLINED
     }
 
-    public MeetingParticipant(UUID id, UUID userId, UUID meetingId, Status status) {
+    public MeetingParticipant(UUID id, UUID userId, String meetingId, Status status) {
         this.id = id;
         this.userId = userId;
         this.meetingId = meetingId;
         this.status = status;
     }
+
 
 }

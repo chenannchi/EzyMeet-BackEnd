@@ -24,33 +24,33 @@ public class MeetingService {
         return meetingRepository.save(meeting);
     }
 
-    // 查詢所有會議
-    public List<Meeting> getAllMeetings() {
-        return meetingRepository.findAll();
-    }
-
-    // 根據 ID 查詢單個會議
-    public Optional<Meeting> getMeetingById(Long id) {
-        return meetingRepository.findById(id);
-    }
-
-    // 刪除會議
-    public void deleteMeeting(Long id) {
-        meetingRepository.delete(id);
-    }
-
-    // 更新會議（如果有需求）
-    public Meeting updateMeeting(Long id, Meeting updatedMeeting) {
-        Optional<Meeting> existingMeeting = meetingRepository.findById(id);
-        if (existingMeeting.isPresent()) {
-            Meeting meeting = existingMeeting.get();
-            meeting.setTitle(updatedMeeting.getTitle());  // 假設你要更新標題
-            meeting.setDescription(updatedMeeting.getDescription());  // 假設你要更新描述
-            // 可以更新更多字段...
-            return meetingRepository.save(meeting);  // 保存更新後的會議
-        } else {
-            // 如果會議不存在，可以丟出錯誤或返回某個標誌
-            return null;
-        }
-    }
+//    // 查詢所有會議
+//    public List<Meeting> getAllMeetings() {
+//        return meetingRepository.findAll();
+//    }
+//
+//    // 根據 ID 查詢單個會議
+//    public Optional<Meeting> getMeetingById(String id) {
+//        return meetingRepository.findById(id);
+//    }
+//
+//    // 刪除會議
+//    public void deleteMeeting(String id) {
+//        meetingRepository.delete(id);
+//    }
+//
+//    // 更新會議（如果有需求）
+//    public Meeting updateMeeting(String id, Meeting updatedMeeting) {
+//        Optional<Meeting> existingMeeting = meetingRepository.findById(id);
+//        if (existingMeeting.isPresent()) {
+//            Meeting meeting = existingMeeting.get();
+//            meeting.setTitle(updatedMeeting.getTitle());  // 假設你要更新標題
+//            meeting.setDescription(updatedMeeting.getDescription());  // 假設你要更新描述
+//            // 可以更新更多字段...
+//            return meetingRepository.save(meeting);  // 保存更新後的會議
+//        } else {
+//            // 如果會議不存在，可以丟出錯誤或返回某個標誌
+//            return null;
+//        }
+//    }
 }
