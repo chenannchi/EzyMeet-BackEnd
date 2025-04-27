@@ -14,6 +14,7 @@ public class MeetingParticipant {
     @Getter
     private String userId;
     @Getter
+    @Setter
     private String meetingId;
     @Setter
     @Getter

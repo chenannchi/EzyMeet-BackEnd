@@ -7,6 +7,7 @@ import java.util.List;
 @Getter
 @Setter
 public class Meeting {
+    private String id;
     private String title;
     private String label;
     private TimeSlot timeslot;
@@ -14,4 +15,5 @@ public class Meeting {
     private String link;
     private List<MeetingParticipant> invitees;
     private String description;
+    private String host;
 }
