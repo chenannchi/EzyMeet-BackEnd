@@ -29,7 +29,7 @@ public class MeetingController {
         return ResponseEntity.ok(createdMeeting);
     }
 
-    @GetMapping("/user/meetings/{userId}")
+    @GetMapping("/user/{userId}")
     public ResponseEntity<List<Meeting>> getUserMeetings(@PathVariable String userId) {
         List<Meeting> meetings = meetingService.getUserMeetings(userId);
         return ResponseEntity.ok(meetings);
