@@ -37,10 +37,16 @@ public class MeetingController {
         return ResponseEntity.ok(meetings);
     }
 
-    @PostMapping("edit")
-    public ResponseEntity<Meeting> editMeeting(@RequestBody Meeting meeting) {
-        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
-        Meeting editedMeeting = meetingService.editMeeting(meeting);
-        return ResponseEntity.ok(editedMeeting);
+//    @PostMapping("edit")
+//    public ResponseEntity<Meeting> editMeeting(@RequestBody Meeting meeting) {
+//        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
+//        Meeting editedMeeting = meetingService.editMeeting(meeting);
+//        return ResponseEntity.ok(editedMeeting);
+//    }
+
+    @DeleteMapping("/delete/{meetingId}")
+    public ResponseEntity<Meeting> deleteMeeting(@PathVariable String meetingId) {
+        meetingService.deleteMeeting(meetingId);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

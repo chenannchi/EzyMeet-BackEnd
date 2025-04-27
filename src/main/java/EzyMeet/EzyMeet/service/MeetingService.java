@@ -46,11 +46,38 @@ public class MeetingService {
             return new ArrayList<>();
         }
 
-        return meetingRepository.findMeetingById(meetingIds);
+        return meetingRepository.findMeetingsById(meetingIds);
     }
 
-    public Meeting editMeeting(Meeting meeting) {
-        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
-        return meetingRepository.edit(meeting);
+//    public Meeting editMeeting(Meeting meeting) {
+//        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
+//
+//        List<MeetingParticipant> currentParticipants =
+//                meetingParticipantRepository.findByMeetingId(meeting.getId());
+//        List<MeetingParticipant> newParticipants = meeting.getInvitees();
+//
+//        if (newParticipants != null) {
+//            Map<String, MeetingParticipant> currentParticipantMap = currentParticipants.stream()
+//                    .collect(Collectors.toMap(MeetingParticipant::getUserId, p -> p));
+//
+//            for (MeetingParticipant newParticipant : newParticipants) {
+//                newParticipant.setMeetingId(meeting.getId());
+//
+//                if (!currentParticipantMap.containsKey(newParticipant.getUserId())) {
+//                    meetingParticipantRepository.create(newParticipant);
+//                } else {
+//                    MeetingParticipant existing = currentParticipantMap.get(newParticipant.getUserId());
+//                    newParticipant.setId(existing.getId());
+//                    meetingParticipantRepository.update(newParticipant);
+//                }
+//            }
+//
+//            return meetingRepository.edit(meeting);
+//        }
+//    }
+
+    public void deleteMeeting(String meetingId) {
+        meetingParticipantRepository.deleteByMeetingId(meetingId);
+        meetingRepository.delete(meetingId);
     }
 }

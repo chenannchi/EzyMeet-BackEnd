@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
 
 
@@ -32,7 +33,7 @@ public class MeetingRepository {
         }
     }
 
-    public List<Meeting> findMeetingById(List<String> meetingIds) {
+    public List<Meeting> findMeetingsById(List<String> meetingIds) {
         List<Meeting> meetings = new ArrayList<>();
         try {
             for (String id : meetingIds) {
@@ -48,13 +49,42 @@ public class MeetingRepository {
         }
     }
 
-    public Meeting edit(Meeting meeting) {
+//    public Meeting edit(Meeting meeting) {
+//        try {
+//            DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(meeting.getId());
+//            docRef.set(meeting);
+//            return meeting;
+//        } catch (Exception e) {
+//            throw new RuntimeException("Failed to update meeting in Firestore", e);
+//        }
+//    }
+
+    public Meeting findById(String meetingId) {
+        DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(meetingId);
         try {
-            DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(meeting.getId());
-            docRef.set(meeting);
-            return meeting;
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to update meeting in Firestore", e);
+            DocumentSnapshot snapshot = docRef.get().get();
+            if (!snapshot.exists()) {
+                throw new NoSuchElementException("Meeting not found: " + meetingId);
+            }
+            return snapshot.toObject(Meeting.class);
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to fetch meeting from Firestore", e);
+        }
+    }
+
+    public void delete(String meetingId) {
+        DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(meetingId);
+        try {
+            DocumentSnapshot snapshot = docRef.get().get();
+            if (!snapshot.exists()) {
+                throw new NoSuchElementException("Meeting not found: " + meetingId);
+            }
+
+            docRef.delete().get();
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to delete meeting from Firestore", e);
         }
     }
 }

@@ -10,6 +10,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class MeetingParticipant {
     @Getter
+    @Setter
     private String id;
     @Getter
     private String userId;
