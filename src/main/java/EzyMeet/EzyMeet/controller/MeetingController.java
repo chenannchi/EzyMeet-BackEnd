@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/meetings")
@@ -36,11 +37,11 @@ public class MeetingController {
     }
 
     @GetMapping("/meeting/{meetingId}")
-    public ResponseEntity<Meeting> getSingleMeetingById(@PathVariable String meetingId) {
-        Meeting meeting = meetingService.getSingleMeetingById(meetingId);
-        if (meeting != null) {
-            return ResponseEntity.ok(meeting);
-        } else {
+    public ResponseEntity<Map<String, Object>> getSingleMeetingById(@PathVariable String meetingId) {
+        try {
+            Map<String, Object> response = meetingService.getSingleMeetingById(meetingId);
+            return ResponseEntity.ok(response);
+        } catch (NoSuchElementException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }

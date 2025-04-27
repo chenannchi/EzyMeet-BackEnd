@@ -49,8 +49,39 @@ public class MeetingService {
         return meetingRepository.findMeetingsById(meetingIds);
     }
 
-    public Meeting getSingleMeetingById(String meetingId) {
-        return meetingRepository.findSingleMeetingById(meetingId);
+    public Map<String, Object> getSingleMeetingById(String meetingId) {
+        Meeting meeting = meetingRepository.findSingleMeetingById(meetingId);
+        if (meeting == null) {
+            throw new NoSuchElementException("Meeting not found with ID: " + meetingId);
+        }
+
+        Map<String, List<MeetingParticipant>> dividedInvitees = new HashMap<>();
+        dividedInvitees.put("invited", new ArrayList<>());
+        dividedInvitees.put("accepted", new ArrayList<>());
+        dividedInvitees.put("declined", new ArrayList<>());
+
+        for (MeetingParticipant invitee : meeting.getInvitees()) {
+            switch (invitee.getStatus()) {
+                case INVITED:
+                    dividedInvitees.get("invited").add(invitee);
+                    break;
+                case ACCEPTED:
+                    dividedInvitees.get("accepted").add(invitee);
+                    break;
+                case DECLINED:
+                    dividedInvitees.get("declined").add(invitee);
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown status: " + invitee.getStatus());
+            }
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("meeting", meeting);
+        response.putAll(dividedInvitees);
+
+        return response;
+//        return meetingRepository.findSingleMeetingById(meetingId);
     }
 
 
