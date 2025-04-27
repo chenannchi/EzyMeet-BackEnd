@@ -45,12 +45,12 @@ public class MeetingController {
         }
     }
 
-//    @PostMapping("/update/{meetingId}")
-//    public ResponseEntity<Meeting> updateMeeting(@PathVariable String meetingId, @RequestBody Meeting meeting) {
-//        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
-//        Meeting updatedMeeting = meetingService.updateMeeting(meetingId, meeting);
-//        return ResponseEntity.ok(updatedMeeting);
-//    }
+    @PostMapping("/update/{meetingId}")
+    public ResponseEntity<Meeting> updateMeeting(@PathVariable String meetingId, @RequestBody Meeting meeting) {
+        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
+        Meeting updatedMeeting = meetingService.updateMeeting(meetingId, meeting);
+        return ResponseEntity.ok(updatedMeeting);
+    }
 
     @DeleteMapping("/delete/{meetingId}")
     public ResponseEntity<Map<String, String>> deleteMeeting(@PathVariable String meetingId) {

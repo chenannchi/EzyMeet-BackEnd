@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -16,22 +17,26 @@ public class MeetingService {
     private final MeetingRepository meetingRepository;
     private final MeetingParticipantRepository meetingParticipantRepository;
 
-    // 使用 constructor injection 將 repository 注入 service
     @Autowired
     public MeetingService(MeetingRepository meetingRepository, MeetingParticipantRepository meetingParticipantRepository) {
         this.meetingRepository = meetingRepository;
         this.meetingParticipantRepository = meetingParticipantRepository;
     }
 
-    // 創建會議
     public Meeting createMeeting(Meeting meeting) {
         // TODO: time conflict check
         Meeting createdMeeting = meetingRepository.create(meeting);
         if (meeting.getInvitees() != null && !meeting.getInvitees().isEmpty()) {
+            List<MeetingParticipant> updatedInvitees = new ArrayList<>();
+
             for (MeetingParticipant participant : meeting.getInvitees()) {
                 participant.setMeetingId(createdMeeting.getId());
-                meetingParticipantRepository.create(participant);
+                MeetingParticipant savedParticipant = meetingParticipantRepository.create(participant);
+                updatedInvitees.add(savedParticipant);
             }
+
+            createdMeeting.setInvitees(updatedInvitees);
+            meetingRepository.update(createdMeeting.getId(), createdMeeting);
         }
         return createdMeeting;
     }
@@ -54,35 +59,46 @@ public class MeetingService {
     }
 
 
-//    public Meeting updateMeeting(String meetingId, Meeting meeting) {
-//        // TODO: time conflict check
-//
-//        Meeting updatedMeeting = meetingRepository.update(meetingId, meeting);
-//
-//        List<MeetingParticipant> originalInvitees = meetingParticipantRepository.findByMeetingId(meetingId);
-//
-//        if (meeting.getInvitees() != null && !meeting.getInvitees().isEmpty()) {
-//            List<MeetingParticipant> newInvitees = meeting.getInvitees();
-//
-//            for (MeetingParticipant newParticipant : newInvitees) {
-//                if (!originalInvitees.contains(newParticipant)) {
-//                    newParticipant.setMeetingId(updatedMeeting.getId());
-//                    meetingParticipantRepository.create(newParticipant);
-//                }
-//            }
-//
-//            for (MeetingParticipant originalParticipant : originalInvitees) {
-//                if (!newInvitees.contains(originalParticipant)) {
-//                    meetingParticipantRepository.delete(originalParticipant.getId());
-//                }
-//            }
-//
-//        }
-//        return updatedMeeting;
-//    }
+    public Meeting updateMeeting(String meetingId, Meeting newMeeting) {
+        // TODO: time conflict check
+
+        Meeting updatedMeeting = meetingRepository.update(meetingId, newMeeting);
+        syncInvitees(updatedMeeting.getId(), newMeeting.getInvitees());
+
+        return updatedMeeting;
+    }
 
     public Meeting deleteMeeting(String meetingId) {
         meetingParticipantRepository.deleteByMeetingId(meetingId);
         return meetingRepository.delete(meetingId);
+    }
+
+    public void syncInvitees(String meetingId, List<MeetingParticipant> newInvitees) {
+        List<MeetingParticipant> originalInvitees = meetingParticipantRepository.findByMeetingId(meetingId);
+        Map<String, MeetingParticipant> origInviteesMap = originalInvitees.stream()
+                .collect(Collectors.toMap(MeetingParticipant::getId, Function.identity()));
+
+        Set<String> incomingIds = newInvitees == null
+                ? Collections.emptySet()
+                : newInvitees.stream()
+                .map(MeetingParticipant::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+        newInvitees.stream()
+                .filter(p -> p.getId() == null || !origInviteesMap.containsKey(p.getId()))
+                .forEach(p -> {
+                    p.setMeetingId(meetingId);
+                    meetingParticipantRepository.create(p);
+                });
+
+        origInviteesMap.keySet().stream()
+                .filter(id -> !incomingIds.contains(id))
+                .forEach(meetingParticipantRepository::delete);
+
+        newInvitees.stream()
+                .filter(p -> p.getId() != null && origInviteesMap.containsKey(p.getId()))
+                .filter(p -> !Objects.equals(origInviteesMap.get(p.getId()).getStatus(), p.getStatus()))
+                .forEach(p -> meetingParticipantRepository.update(p.getId(), p));
     }
 }

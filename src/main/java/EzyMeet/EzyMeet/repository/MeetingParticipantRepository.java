@@ -34,7 +34,24 @@ public class MeetingParticipantRepository {
         }
     }
 
-    //public void deleteParti
+    public MeetingParticipant update(String participantId, MeetingParticipant updatedmeetingParticipant) {
+        try {
+            DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(participantId);
+            docRef.set(updatedmeetingParticipant, SetOptions.merge());
+            return updatedmeetingParticipant;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update meeting participant", e);
+        }
+    }
+
+    public void delete(String participantId) {
+        try {
+            DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(participantId);
+            docRef.delete();
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to delete meeting participant", e);
+        }
+    }
 
     public void deleteByMeetingId(String meetingId) {
         try {
