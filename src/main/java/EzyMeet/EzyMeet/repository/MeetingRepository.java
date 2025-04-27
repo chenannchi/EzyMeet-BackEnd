@@ -73,15 +73,16 @@ public class MeetingRepository {
         }
     }
 
-    public void delete(String meetingId) {
+    public Meeting delete(String meetingId) {
         DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(meetingId);
         try {
             DocumentSnapshot snapshot = docRef.get().get();
             if (!snapshot.exists()) {
                 throw new NoSuchElementException("Meeting not found: " + meetingId);
             }
-
+            Meeting meeting = snapshot.toObject(Meeting.class);
             docRef.delete().get();
+            return meeting;
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Failed to delete meeting from Firestore", e);

@@ -7,7 +7,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -45,8 +47,10 @@ public class MeetingController {
 //    }
 
     @DeleteMapping("/delete/{meetingId}")
-    public ResponseEntity<Meeting> deleteMeeting(@PathVariable String meetingId) {
-        meetingService.deleteMeeting(meetingId);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    public ResponseEntity<Map<String, String>> deleteMeeting(@PathVariable String meetingId) {
+        Meeting deletedMeeting = meetingService.deleteMeeting(meetingId);
+        Map<String, String> response = new HashMap<>();
+        response.put("title", deletedMeeting.getTitle());
+        return ResponseEntity.ok(response);
     }
 }

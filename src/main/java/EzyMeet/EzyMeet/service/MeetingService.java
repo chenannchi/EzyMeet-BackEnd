@@ -76,8 +76,8 @@ public class MeetingService {
 //        }
 //    }
 
-    public void deleteMeeting(String meetingId) {
+    public Meeting deleteMeeting(String meetingId) {
         meetingParticipantRepository.deleteByMeetingId(meetingId);
-        meetingRepository.delete(meetingId);
+        return meetingRepository.delete(meetingId);
     }
 }
