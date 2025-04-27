@@ -49,32 +49,22 @@ public class MeetingService {
         return meetingRepository.findMeetingsById(meetingIds);
     }
 
-//    public Meeting editMeeting(Meeting meeting) {
-//        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
-//
-//        List<MeetingParticipant> currentParticipants =
-//                meetingParticipantRepository.findByMeetingId(meeting.getId());
-//        List<MeetingParticipant> newParticipants = meeting.getInvitees();
-//
-//        if (newParticipants != null) {
-//            Map<String, MeetingParticipant> currentParticipantMap = currentParticipants.stream()
-//                    .collect(Collectors.toMap(MeetingParticipant::getUserId, p -> p));
-//
-//            for (MeetingParticipant newParticipant : newParticipants) {
-//                newParticipant.setMeetingId(meeting.getId());
-//
-//                if (!currentParticipantMap.containsKey(newParticipant.getUserId())) {
-//                    meetingParticipantRepository.create(newParticipant);
-//                } else {
-//                    MeetingParticipant existing = currentParticipantMap.get(newParticipant.getUserId());
-//                    newParticipant.setId(existing.getId());
-//                    meetingParticipantRepository.update(newParticipant);
-//                }
-//            }
-//
-//            return meetingRepository.edit(meeting);
-//        }
-//    }
+    public Meeting getSingleMeetingById(String meetingId) {
+        return meetingRepository.findSingleMeetingById(meetingId);
+    }
+
+
+    public Meeting updateMeeting(String meetingId, Meeting meeting) {
+        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
+        Meeting updatedMeeting = meetingRepository.update(meetingId, meeting);
+        if (meeting.getInvitees() != null && !meeting.getInvitees().isEmpty()) {
+            for (MeetingParticipant participant : meeting.getInvitees()) {
+                participant.setMeetingId(updatedMeeting.getId());
+                meetingParticipantRepository.create(participant);
+            }
+        }
+        return updatedMeeting;
+    }
 
     public Meeting deleteMeeting(String meetingId) {
         meetingParticipantRepository.deleteByMeetingId(meetingId);

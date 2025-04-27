@@ -2,10 +2,7 @@ package EzyMeet.EzyMeet.repository;
 
 import EzyMeet.EzyMeet.model.Meeting;
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +24,7 @@ public class MeetingRepository {
             ApiFuture<DocumentReference> future = meetings.add(meeting);
             DocumentReference docRef = future.get();
             meeting.setId(docRef.getId());
+            docRef.set(meeting, SetOptions.merge());
             return meeting;
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Failed to save meeting to Firestore", e);
@@ -49,27 +47,32 @@ public class MeetingRepository {
         }
     }
 
-//    public Meeting edit(Meeting meeting) {
-//        try {
-//            DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(meeting.getId());
-//            docRef.set(meeting);
-//            return meeting;
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to update meeting in Firestore", e);
-//        }
-//    }
+    public Meeting findSingleMeetingById(String meetingId) {
+        try {
+            DocumentSnapshot doc = firestore.collection(COLLECTION_NAME).document(meetingId).get().get();
+            if (doc.exists()) {
+                return doc.toObject(Meeting.class);
+            } else {
+                throw new NoSuchElementException("Meeting not found: " + meetingId);
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            Thread.currentThread().interrupt();
+            throw new RuntimeException("Failed to fetch meeting by ID", e);
+        }
+    }
 
-    public Meeting findById(String meetingId) {
+    public Meeting update(String meetingId, Meeting meeting) {
         DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(meetingId);
         try {
             DocumentSnapshot snapshot = docRef.get().get();
             if (!snapshot.exists()) {
                 throw new NoSuchElementException("Meeting not found: " + meetingId);
             }
-            return snapshot.toObject(Meeting.class);
+            docRef.set(meeting);
+            return meeting;
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("Failed to fetch meeting from Firestore", e);
+            throw new RuntimeException("Failed to update meeting in Firestore", e);
         }
     }
 

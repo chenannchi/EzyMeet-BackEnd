@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/meetings")
@@ -32,19 +31,28 @@ public class MeetingController {
         return ResponseEntity.ok(createdMeeting);
     }
 
-
-    @GetMapping("/user/{userId}")
+    @GetMapping("/user/meetings/{userId}")
     public ResponseEntity<List<Meeting>> getUserMeetings(@PathVariable String userId) {
         List<Meeting> meetings = meetingService.getUserMeetings(userId);
         return ResponseEntity.ok(meetings);
     }
 
-//    @PostMapping("edit")
-//    public ResponseEntity<Meeting> editMeeting(@RequestBody Meeting meeting) {
-//        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
-//        Meeting editedMeeting = meetingService.editMeeting(meeting);
-//        return ResponseEntity.ok(editedMeeting);
-//    }
+    @GetMapping("/meeting/{meetingId}")
+    public ResponseEntity<Meeting> getSingleMeetingById(@PathVariable String meetingId) {
+        Meeting meeting = meetingService.getSingleMeetingById(meetingId);
+        if (meeting != null) {
+            return ResponseEntity.ok(meeting);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @PostMapping("/update/{meetingId}")
+    public ResponseEntity<Meeting> updateMeeting(@PathVariable String meetingId, @RequestBody Meeting meeting) {
+        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
+        Meeting updatedMeeting = meetingService.updateMeeting(meetingId, meeting);
+        return ResponseEntity.ok(updatedMeeting);
+    }
 
     @DeleteMapping("/delete/{meetingId}")
     public ResponseEntity<Map<String, String>> deleteMeeting(@PathVariable String meetingId) {
