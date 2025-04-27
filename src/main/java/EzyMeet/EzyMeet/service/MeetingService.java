@@ -25,7 +25,7 @@ public class MeetingService {
 
     // 創建會議
     public Meeting createMeeting(Meeting meeting) {
-        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
+        // TODO: time conflict check
         Meeting createdMeeting = meetingRepository.create(meeting);
         if (meeting.getInvitees() != null && !meeting.getInvitees().isEmpty()) {
             for (MeetingParticipant participant : meeting.getInvitees()) {
@@ -54,17 +54,32 @@ public class MeetingService {
     }
 
 
-    public Meeting updateMeeting(String meetingId, Meeting meeting) {
-        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
-        Meeting updatedMeeting = meetingRepository.update(meetingId, meeting);
-        if (meeting.getInvitees() != null && !meeting.getInvitees().isEmpty()) {
-            for (MeetingParticipant participant : meeting.getInvitees()) {
-                participant.setMeetingId(updatedMeeting.getId());
-                meetingParticipantRepository.create(participant);
-            }
-        }
-        return updatedMeeting;
-    }
+//    public Meeting updateMeeting(String meetingId, Meeting meeting) {
+//        // TODO: time conflict check
+//
+//        Meeting updatedMeeting = meetingRepository.update(meetingId, meeting);
+//
+//        List<MeetingParticipant> originalInvitees = meetingParticipantRepository.findByMeetingId(meetingId);
+//
+//        if (meeting.getInvitees() != null && !meeting.getInvitees().isEmpty()) {
+//            List<MeetingParticipant> newInvitees = meeting.getInvitees();
+//
+//            for (MeetingParticipant newParticipant : newInvitees) {
+//                if (!originalInvitees.contains(newParticipant)) {
+//                    newParticipant.setMeetingId(updatedMeeting.getId());
+//                    meetingParticipantRepository.create(newParticipant);
+//                }
+//            }
+//
+//            for (MeetingParticipant originalParticipant : originalInvitees) {
+//                if (!newInvitees.contains(originalParticipant)) {
+//                    meetingParticipantRepository.delete(originalParticipant.getId());
+//                }
+//            }
+//
+//        }
+//        return updatedMeeting;
+//    }
 
     public Meeting deleteMeeting(String meetingId) {
         meetingParticipantRepository.deleteByMeetingId(meetingId);

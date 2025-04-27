@@ -34,6 +34,8 @@ public class MeetingParticipantRepository {
         }
     }
 
+    //public void deleteParti
+
     public void deleteByMeetingId(String meetingId) {
         try {
             List<MeetingParticipant> participants = findByMeetingId(meetingId);

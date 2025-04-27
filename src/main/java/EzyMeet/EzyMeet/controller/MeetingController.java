@@ -23,10 +23,8 @@ public class MeetingController {
         this.meetingService = meetingService;
     }
 
-    // 創建會議
     @PostMapping("/create")
     public ResponseEntity<Meeting> createMeeting(@RequestBody Meeting meeting) {
-        //如果 JSON 中缺少某個字段（如 id），相應的對象屬性會被設為 null（對於 Long 等引用類型）
         Meeting createdMeeting = meetingService.createMeeting(meeting);
         return ResponseEntity.ok(createdMeeting);
     }
@@ -47,12 +45,12 @@ public class MeetingController {
         }
     }
 
-    @PostMapping("/update/{meetingId}")
-    public ResponseEntity<Meeting> updateMeeting(@PathVariable String meetingId, @RequestBody Meeting meeting) {
-        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
-        Meeting updatedMeeting = meetingService.updateMeeting(meetingId, meeting);
-        return ResponseEntity.ok(updatedMeeting);
-    }
+//    @PostMapping("/update/{meetingId}")
+//    public ResponseEntity<Meeting> updateMeeting(@PathVariable String meetingId, @RequestBody Meeting meeting) {
+//        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
+//        Meeting updatedMeeting = meetingService.updateMeeting(meetingId, meeting);
+//        return ResponseEntity.ok(updatedMeeting);
+//    }
 
     @DeleteMapping("/delete/{meetingId}")
     public ResponseEntity<Map<String, String>> deleteMeeting(@PathVariable String meetingId) {
