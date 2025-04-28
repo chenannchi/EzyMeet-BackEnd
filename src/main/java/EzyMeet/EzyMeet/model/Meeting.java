@@ -13,7 +13,6 @@ public class Meeting {
     private TimeSlot timeslot;
     private String location;
     private String link;
-    private List<MeetingParticipant> invitees;
     private String description;
     private String host;
 }

@@ -11,6 +11,7 @@ import java.util.UUID;
 @Getter
 @AllArgsConstructor
 public class MeetingRecord {
-    private UUID id;
+    private String id;
+    private String meetingId;
     private String content;
 }
