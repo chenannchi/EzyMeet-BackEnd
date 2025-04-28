@@ -26,9 +26,7 @@ public class UserController {
         return ResponseEntity.ok(createdUser);
     }
 
-
-
-    @PutMapping("/update")
+    @PostMapping("/update")
     public ResponseEntity<User> updateUser(@RequestBody User user) {
         User updatedUser = userService.update(user);
         return ResponseEntity.ok(updatedUser);
@@ -41,11 +39,12 @@ public class UserController {
     }
 
 
-//    @PostMapping("/sync")
-//    public ResponseEntity<User> syncGoogleUser(@RequestBody User googleUser) {
-//        User syncedUser = userService.syncGoogleUser(googleUser);
-//        return ResponseEntity.ok(syncedUser);
-//    }
+    @PostMapping("/sync")
+    public ResponseEntity<User> syncGoogleUser(@RequestBody User googleUser) {
+        User syncedUser = userService.syncGoogleUser(googleUser);
+        return ResponseEntity.ok(syncedUser);
+    }
+
 //
 //    @GetMapping("/all-users-email-id")
 //    public ResponseEntity<List<Map<String, String>>> getAllUsersEmailAndId() {

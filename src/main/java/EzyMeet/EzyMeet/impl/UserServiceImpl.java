@@ -27,19 +27,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User syncGoogleUser(User googleUser) {
-
-        return null;
-    }
-
-    @Override
-    public List<Map<String, String>> getAllUsersEmailAndId() {
-        return userRepository.findAll().stream()
-                .map(user -> Map.of("id", user.getId(), "email", user.getEmail()))
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public User update(User user) {
         return userRepository.update(user);
     }
@@ -50,6 +37,34 @@ public class UserServiceImpl implements UserService {
                 .filter(user -> user.getId().equals(userId))
                 .findFirst()
                 .orElse(null);
+    }
+
+    @Override
+    public String getUserIdByGoogleId(String googleId) {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getGoogleUid().equals(googleId))
+                .map(User::getId)
+                .findFirst()
+                .orElse(null);
+    }
+
+
+    @Override
+    public User syncGoogleUser(User googleUser) {
+        String userId = getUserIdByGoogleId(googleUser.getGoogleUid());
+        if (userId != null) {
+            googleUser.setId(userId);
+            return update(googleUser);
+        } else {
+            return create(googleUser);
+        }
+    }
+
+    @Override
+    public List<Map<String, String>> getAllUsersEmailAndId() {
+        return userRepository.findAll().stream()
+                .map(user -> Map.of("id", user.getId(), "email", user.getEmail()))
+                .collect(Collectors.toList());
     }
 
 

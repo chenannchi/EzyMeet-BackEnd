@@ -8,6 +8,8 @@ import java.util.Map;
 public interface UserService {
     User create(User user);
 
+    String getUserIdByGoogleId(String googleId);
+
     User syncGoogleUser(User googleUser);
 
     List<Map<String, String>> getAllUsersEmailAndId();
