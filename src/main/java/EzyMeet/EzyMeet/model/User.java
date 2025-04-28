@@ -1,21 +1,27 @@
 package EzyMeet.EzyMeet.model;
 
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-
-import java.util.UUID;
+import lombok.Setter;
 
 @Getter
-public class User{
+@AllArgsConstructor
+public class User {
     private String id;
-    private String googleId;
-    private String userName;
+    private String googleUid;
     private String email;
+    private String emailVerified;
+    private String providerId;
+    private String metaData;
+    private String idToken;
 
-    public User(String id, String googleId, String name, String email) {
-        this.id = id;
-        this.googleId = googleId;
-        this.userName = name;
-        this.email = email;
-    }
+    @Setter
+    private String displayName;
+
+    @Setter
+    private String photoUrl;
+
+    @Setter
+    private String phoneNumber;
 }

@@ -5,6 +5,7 @@ import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentReference;
 import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -27,6 +28,19 @@ public class UserRepository {
             return user;
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Failed to save user to Firestore", e);
+        }
+    }
+
+    public List<User> findAll() {
+        try {
+            List<QueryDocumentSnapshot> documents = firestore.collection(COLLECTION_NAME).get().get().getDocuments();
+            List<User> users = new ArrayList<>();
+            for (QueryDocumentSnapshot document : documents) {
+                users.add(document.toObject(User.class));
+            }
+            return users;
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Failed to fetch users from Firestore", e);
         }
     }
 }
