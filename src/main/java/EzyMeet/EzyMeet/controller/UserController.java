@@ -32,24 +32,21 @@ public class UserController {
         return ResponseEntity.ok(updatedUser);
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<User> getUser(@PathVariable String userId) {
-        User user = userService.getUserById(userId);
-        return ResponseEntity.ok(user);
-    }
-
-
     @PostMapping("/sync")
     public ResponseEntity<User> syncGoogleUser(@RequestBody User googleUser) {
         User syncedUser = userService.syncGoogleUser(googleUser);
         return ResponseEntity.ok(syncedUser);
     }
 
-//
-//    @GetMapping("/all-users-email-id")
-//    public ResponseEntity<List<Map<String, String>>> getAllUsersEmailAndId() {
-//        List<Map<String, String>> emailsAndIds = userService.getAllUsersEmailAndId();
-//        return ResponseEntity.ok(emailsAndIds);
-//    }
+    @GetMapping("/participant-options")
+    public ResponseEntity<List<Map<String, String>>> getAllParticipantOptions() {
+        List<Map<String, String>> emailsAndIds = userService.getAllParticipantOptions();
+        return ResponseEntity.ok(emailsAndIds);
+    }
 
+    @GetMapping("/{userId}")
+    public ResponseEntity<User> getUser(@PathVariable String userId) {
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(user);
+    }
 }
