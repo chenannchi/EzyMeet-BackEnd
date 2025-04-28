@@ -156,24 +156,24 @@ public class MeetingServiceImpl implements MeetingService {
 
         Meeting savedMeeting = meetingRepository.update(meetingId, updatedMeeting);
 
-        List<RequestUpdateMeetingDto.RequestParticipantDto> participantDtos = new ArrayList<>();
-        if (requestUpdateDto.getParticipants() != null) {
-            List<MeetingParticipant> participants = requestUpdateDto.getParticipants().stream()
-                    .map(dto -> {
-                        MeetingParticipant participant = new MeetingParticipant();
-                        participant.setId(dto.getId());
-                        participant.setMeetingId(meetingId);
-                        participant.setUserId(dto.getUserId());
-                        participant.setStatus(dto.getStatus());
-                        return participant;
-                    })
-                    .collect(Collectors.toList());
-
-            syncParticipants(meetingId, participants);
-
-            participantDtos = requestUpdateDto.getParticipants();
-        }
-
+//        List<RequestUpdateMeetingDto.RequestParticipantDto> participantDtos = new ArrayList<>();
+//        if (requestUpdateDto.getParticipants() != null) {
+//            List<MeetingParticipant> participants = requestUpdateDto.getParticipants().stream()
+//                    .map(dto -> {
+//                        MeetingParticipant participant = new MeetingParticipant();
+//                        participant.setId(dto.getId());
+//                        participant.setMeetingId(meetingId);
+//                        participant.setUserId(dto.getUserId());
+//                        participant.setStatus(dto.getStatus());
+//                        return participant;
+//                    })
+//                    .collect(Collectors.toList());
+//
+//            syncParticipants(meetingId, participants);
+//
+//            participantDtos = requestUpdateDto.getParticipants();
+//        }
+        List<RequestUpdateMeetingDto.RequestParticipantDto> participantDtos = requestUpdateDto.getParticipants();
         return RequestUpdateMeetingDto.builder()
                 .title(savedMeeting.getTitle())
                 .label(savedMeeting.getLabel())
@@ -209,7 +209,6 @@ public class MeetingServiceImpl implements MeetingService {
                 .filter(p -> !originalParticipantMap.containsKey(p.getUserId()))
                 .forEach(p -> {
                     p.setMeetingId(meetingId);
-                    // Don't keep the ID if it's a new participant
                     p.setId(null);
                     meetingParticipantRepository.create(p);
                 });
@@ -230,11 +229,9 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     private ResponseMeetingDto convertMeetingToDto(Meeting meeting) {
-        // Get participants for this meeting
         List<MeetingParticipant> participants =
                 meetingParticipantRepository.findByMeetingId(meeting.getId());
 
-        // Convert participants to DTOs
         List<ResponseMeetingDto.ParticipantResponseDto> participantDtos =
                 participants.stream()
                         .map(p -> ResponseMeetingDto.ParticipantResponseDto.builder()
@@ -255,6 +252,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .participants(participantDtos)
                 .build();
     }
+
 
     //    public MeetingRecord createMeetingRecord(String meetingId, MeetingRecord meetingRecord) {
 //        meetingRecord.setMeetingId(meetingId);
