@@ -22,4 +22,9 @@ public class TimeSlot {
         this.startDate = startDateTime;
         this.endDate = endDateTime;
     }
+
+    public boolean conflictsWith(TimeSlot other) {
+        return this.startDate.before(other.endDate) &&
+                other.startDate.before(this.endDate);
+    }
 }

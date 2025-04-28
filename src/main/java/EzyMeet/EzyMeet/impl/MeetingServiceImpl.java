@@ -4,8 +4,10 @@ import EzyMeet.EzyMeet.dto.RequestCreateMeetingDto;
 import EzyMeet.EzyMeet.dto.RequestUpdateMeetingDto;
 import EzyMeet.EzyMeet.dto.ResponseDetailedMeetingDto;
 import EzyMeet.EzyMeet.dto.ResponseMeetingDto;
+import EzyMeet.EzyMeet.exception.TimeSlotConflictException;
 import EzyMeet.EzyMeet.model.Meeting;
 import EzyMeet.EzyMeet.model.MeetingParticipant;
+import EzyMeet.EzyMeet.model.TimeSlot;
 import EzyMeet.EzyMeet.repository.MeetingParticipantRepository;
 import EzyMeet.EzyMeet.repository.MeetingRepository;
 import EzyMeet.EzyMeet.service.MeetingService;
@@ -29,6 +31,11 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     public ResponseMeetingDto createMeeting(RequestCreateMeetingDto requestDto) {
+        List<TimeSlot> userMeetingTimeSlots = getUserMeetingTimeSlots(requestDto.getHost());
+        if (isTimeSlotConflict(requestDto.getTimeslot(), userMeetingTimeSlots)) {
+            throw new TimeSlotConflictException("The provided time slot conflicts with existing time slots.");
+        }
+
         Meeting meeting = new Meeting();
         meeting.setTitle(requestDto.getTitle());
         meeting.setLabel(requestDto.getLabel());
@@ -37,8 +44,6 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setLink(requestDto.getLink());
         meeting.setDescription(requestDto.getDescription());
         meeting.setHost(requestDto.getHost());
-
-        // TODO: time conflict check
 
         Meeting savedMeeting = meetingRepository.create(meeting);
 
@@ -137,7 +142,11 @@ public class MeetingServiceImpl implements MeetingService {
 
 
     public RequestUpdateMeetingDto updateMeeting(String meetingId, RequestUpdateMeetingDto requestUpdateDto) {
-        // TODO: time conflict check
+// FIXME:
+//        List<TimeSlot> userMeetingTimeSlotsExceptCurrent = getUserMeetingTimeSlotsExcludeCurrentMeeting(requestUpdateDto.getHost(), meetingId);
+//        if (isTimeSlotConflict(requestUpdateDto.getTimeslot(), userMeetingTimeSlotsExceptCurrent)) {
+//            throw new TimeSlotConflictException("The provided time slot conflicts with existing time slots.");
+//        }
 
         Meeting existingMeeting = meetingRepository.findSingleMeetingById(meetingId);
         if (existingMeeting == null) {
@@ -253,7 +262,39 @@ public class MeetingServiceImpl implements MeetingService {
                 .build();
     }
 
+    private boolean isTimeSlotConflict(TimeSlot newTimeSlot, List<TimeSlot> existingTimeSlots) {
+        return existingTimeSlots.stream()
+                .anyMatch(existingTimeSlot -> existingTimeSlot.conflictsWith(newTimeSlot));
+    }
 
+    private List<Meeting> getUserAllMeetings(String userId) {
+        List<String> participantMeetingIds = meetingParticipantRepository.findByUserId(userId)
+                .stream()
+                .map(MeetingParticipant::getMeetingId)
+                .collect(Collectors.toList());
+
+        List<Meeting> hostedMeetings = meetingRepository.findMeetingsByHost(userId);
+        List<Meeting> participantMeetings = meetingRepository.findMeetingsById(participantMeetingIds);
+
+        List<Meeting> allMeetings = new ArrayList<>(participantMeetings);
+        allMeetings.addAll(hostedMeetings);
+
+        return allMeetings;
+    }
+
+    public List<TimeSlot> getUserMeetingTimeSlotsExcludeCurrentMeeting(String userId, String meetingIdToExclude) {
+        return getUserAllMeetings(userId).stream()
+                .filter(meeting -> !meeting.getId().equals(meetingIdToExclude))
+                .map(Meeting::getTimeslot)
+                .distinct()
+                .collect(Collectors.toList());
+    }
+
+    public List<TimeSlot> getUserMeetingTimeSlots(String userId) {
+        return getUserAllMeetings(userId).stream()
+                .map(Meeting::getTimeslot)
+                .collect(Collectors.toList());
+    }
     //    public MeetingRecord createMeetingRecord(String meetingId, MeetingRecord meetingRecord) {
 //        meetingRecord.setMeetingId(meetingId);
 //        return meetingRecordRepository.create(meetingRecord);

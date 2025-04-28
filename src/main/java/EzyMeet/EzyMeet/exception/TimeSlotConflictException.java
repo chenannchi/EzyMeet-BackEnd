@@ -9,8 +9,8 @@ import java.util.List;
 public class TimeSlotConflictException extends RuntimeException {
     private final List<Meeting> conflictingMeetings;
 
-    public TimeSlotConflictException(String message, List<Meeting> conflictingMeetings) {
+    public TimeSlotConflictException(String message) {
         super(message);
-        this.conflictingMeetings = conflictingMeetings;
+        this.conflictingMeetings = null;
     }
 }

@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 
 @Repository
@@ -89,6 +90,21 @@ public class MeetingRepository {
         } catch (InterruptedException | ExecutionException e) {
             Thread.currentThread().interrupt();
             throw new RuntimeException("Failed to delete meeting from Firestore", e);
+        }
+    }
+
+    public List<Meeting> findMeetingsByHost(String hostId) {
+        try {
+            return firestore.collection(COLLECTION_NAME)
+                    .whereEqualTo("host", hostId)
+                    .get()
+                    .get()
+                    .getDocuments()
+                    .stream()
+                    .map(doc -> doc.toObject(Meeting.class))
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to fetch meetings by host", e);
         }
     }
 }

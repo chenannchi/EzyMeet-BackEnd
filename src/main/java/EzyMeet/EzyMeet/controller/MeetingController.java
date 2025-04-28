@@ -4,10 +4,12 @@ import EzyMeet.EzyMeet.dto.RequestCreateMeetingDto;
 import EzyMeet.EzyMeet.dto.RequestUpdateMeetingDto;
 import EzyMeet.EzyMeet.dto.ResponseDetailedMeetingDto;
 import EzyMeet.EzyMeet.dto.ResponseMeetingDto;
+import EzyMeet.EzyMeet.exception.TimeSlotConflictException;
 import EzyMeet.EzyMeet.model.Meeting;
 import EzyMeet.EzyMeet.model.MeetingRecord;
 import EzyMeet.EzyMeet.service.MeetingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -29,9 +31,15 @@ public class MeetingController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<ResponseMeetingDto> createMeeting(@RequestBody RequestCreateMeetingDto requestDto) {
-        ResponseMeetingDto createdMeeting = meetingService.createMeeting(requestDto);
-        return ResponseEntity.ok(createdMeeting);
+    public ResponseEntity<?> createMeeting(@RequestBody RequestCreateMeetingDto requestDto) {
+        try {
+            ResponseMeetingDto createdMeeting = meetingService.createMeeting(requestDto);
+            return ResponseEntity.ok(createdMeeting);
+        } catch (TimeSlotConflictException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("The provided time slot conflicts with existing time slots.", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        }
     }
 
     @GetMapping("/user/{userId}")
@@ -51,10 +59,15 @@ public class MeetingController {
     }
 
     @PostMapping("/update/{meetingId}")
-    public ResponseEntity<RequestUpdateMeetingDto> updateMeeting(@PathVariable String meetingId, @RequestBody RequestUpdateMeetingDto requestUpdateDto) {
-        // 這裡可以添加一些驗證邏輯，例如檢查會議時間是否衝突等
-        RequestUpdateMeetingDto updatedMeeting = meetingService.updateMeeting(meetingId, requestUpdateDto);
-        return ResponseEntity.ok(updatedMeeting);
+    public ResponseEntity<?> updateMeeting(@PathVariable String meetingId, @RequestBody RequestUpdateMeetingDto requestUpdateDto) {
+        try {
+            RequestUpdateMeetingDto updatedMeeting = meetingService.updateMeeting(meetingId, requestUpdateDto);
+            return ResponseEntity.ok(updatedMeeting);
+        } catch (TimeSlotConflictException e) {
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("The provided time slot conflicts with existing time slots.", e.getMessage());
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
+        }
     }
 
     @DeleteMapping("/delete/{meetingId}")
