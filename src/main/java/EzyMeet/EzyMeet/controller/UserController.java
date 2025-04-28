@@ -1,6 +1,5 @@
 package EzyMeet.EzyMeet.controller;
 
-import EzyMeet.EzyMeet.dto.UserSyncDTO;
 import EzyMeet.EzyMeet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +28,7 @@ public class UserController {
 
 
 
-    @PostMapping("/update/{userId}")
+    @PutMapping("/update")
     public ResponseEntity<User> updateUser(@RequestBody User user) {
         User updatedUser = userService.update(user);
         return ResponseEntity.ok(updatedUser);

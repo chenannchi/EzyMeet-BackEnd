@@ -32,9 +32,10 @@ public class UserRepository {
     }
 
     public User update(User user) {
-        DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(user.getId());
         try {
-            docRef.set(user).get();
+            DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(user.getId());
+            ApiFuture<WriteResult> future = docRef.set(user, SetOptions.merge());
+            future.get();
             return user;
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Failed to update user in Firestore", e);
