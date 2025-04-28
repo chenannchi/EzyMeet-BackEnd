@@ -1,5 +1,6 @@
 package EzyMeet.EzyMeet.controller;
 
+import EzyMeet.EzyMeet.dto.UserSyncDTO;
 import EzyMeet.EzyMeet.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +23,24 @@ public class UserController {
 
     @PostMapping("/create")
     public ResponseEntity<User> createUser(@RequestBody User user) {
-        // pls help me print something out so that i can know whether the api is working or not
-        System.out.println("Creating user: " + user);
         User createdUser = userService.create(user);
         return ResponseEntity.ok(createdUser);
     }
+
+
+
+    @PostMapping("/update/{userId}")
+    public ResponseEntity<User> updateUser(@RequestBody User user) {
+        User updatedUser = userService.update(user);
+        return ResponseEntity.ok(updatedUser);
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<User> getUser(@PathVariable String userId) {
+        User user = userService.getUserById(userId);
+        return ResponseEntity.ok(user);
+    }
+
 
 //    @PostMapping("/sync")
 //    public ResponseEntity<User> syncGoogleUser(@RequestBody User googleUser) {

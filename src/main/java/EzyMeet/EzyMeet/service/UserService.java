@@ -11,4 +11,8 @@ public interface UserService {
     User syncGoogleUser(User googleUser);
 
     List<Map<String, String>> getAllUsersEmailAndId();
+
+    User update(User user);
+
+    User getUserById(String userId);
 }

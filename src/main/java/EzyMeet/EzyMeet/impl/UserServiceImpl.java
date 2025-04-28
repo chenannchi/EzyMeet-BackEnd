@@ -39,5 +39,18 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public User update(User user) {
+        return userRepository.update(user);
+    }
+
+    @Override
+    public User getUserById(String userId) {
+        return userRepository.findAll().stream()
+                .filter(user -> user.getId().equals(userId))
+                .findFirst()
+                .orElse(null);
+    }
+
 
 }
