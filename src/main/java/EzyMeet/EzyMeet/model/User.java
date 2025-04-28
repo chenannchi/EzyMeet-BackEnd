@@ -8,13 +8,16 @@ import lombok.Setter;
 @Getter
 @AllArgsConstructor
 public class User {
-    private String id;
+
     private String googleUid;
     private String email;
     private String emailVerified;
     private String providerId;
     private String metaData;
     private String idToken;
+
+    @Setter
+    private String id;
 
     @Setter
     private String displayName;
@@ -24,4 +27,5 @@ public class User {
 
     @Setter
     private String phoneNumber;
+
 }

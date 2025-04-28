@@ -2,10 +2,7 @@ package EzyMeet.EzyMeet.repository;
 
 import EzyMeet.EzyMeet.model.User;
 import com.google.api.core.ApiFuture;
-import com.google.cloud.firestore.CollectionReference;
-import com.google.cloud.firestore.DocumentReference;
-import com.google.cloud.firestore.Firestore;
-import com.google.cloud.firestore.QueryDocumentSnapshot;
+import com.google.cloud.firestore.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -25,9 +22,22 @@ public class UserRepository {
         try {
             ApiFuture<DocumentReference> future = users.add(user);
             DocumentReference docRef = future.get();
+            String generatedId = docRef.getId();
+            user.setId(generatedId);
+            docRef.set(user, SetOptions.merge());
             return user;
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException("Failed to save user to Firestore", e);
+        }
+    }
+
+    public User update(User user) {
+        DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(user.getId());
+        try {
+            docRef.set(user).get();
+            return user;
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Failed to update user in Firestore", e);
         }
     }
 
@@ -43,4 +53,6 @@ public class UserRepository {
             throw new RuntimeException("Failed to fetch users from Firestore", e);
         }
     }
+
+
 }
