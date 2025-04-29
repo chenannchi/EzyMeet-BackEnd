@@ -1,6 +1,7 @@
 package EzyMeet.EzyMeet.impl;
 
 import EzyMeet.EzyMeet.dto.RequestCreateMeetingDto;
+import EzyMeet.EzyMeet.dto.RequestUpdateMeetingDto;
 import EzyMeet.EzyMeet.dto.ResponseDetailedMeetingDto;
 import EzyMeet.EzyMeet.dto.ResponseMeetingDto;
 import EzyMeet.EzyMeet.exception.TimeSlotConflictException;
@@ -330,6 +331,225 @@ public void createMeetingTimeSlotConflict() {
 
         verify(meetingRepository).findSingleMeetingById(meetingId);
         verify(meetingParticipantRepository, never()).findByMeetingId(anyString());
+    }
+
+    @Test
+    public void updateMeetingSuccess() {
+        String meetingId = "meeting123";
+        String userId = "user456";
+        TimeSlot timeSlot = convertTimeSlot("2025-12-15T18:00:00.000+00:00", "2025-12-15T20:00:00.000+00:00");
+
+        Meeting existingMeeting = new Meeting();
+        existingMeeting.setId(meetingId);
+        existingMeeting.setTitle("Original Title");
+        existingMeeting.setLabel("Original Label");
+        existingMeeting.setTimeslot(timeSlot);
+        existingMeeting.setLocation("Original Location");
+        existingMeeting.setLink("https://original.com");
+        existingMeeting.setDescription("Original Description");
+        existingMeeting.setHost(userId);
+        existingMeeting.setMeetingRecord("Original notes");
+
+        RequestUpdateMeetingDto requestUpdateDto = new RequestUpdateMeetingDto();
+        requestUpdateDto.setTitle("Updated Title");
+        requestUpdateDto.setLabel("Updated Label");
+        requestUpdateDto.setTimeslot(timeSlot);
+        requestUpdateDto.setLocation("Updated Location");
+        requestUpdateDto.setLink("https://updated.com");
+        requestUpdateDto.setDescription("Updated Description");
+        requestUpdateDto.setHost(userId);
+        requestUpdateDto.setMeetingRecord("Updated notes");
+
+        RequestUpdateMeetingDto.RequestParticipantDto participantDto = new RequestUpdateMeetingDto.RequestParticipantDto();
+        participantDto.setUserId("participant123");
+        participantDto.setStatus(MeetingParticipant.Status.ACCEPTED);
+        requestUpdateDto.setParticipants(Collections.singletonList(participantDto));
+
+        Meeting updatedMeeting = new Meeting();
+        updatedMeeting.setId(meetingId);
+        updatedMeeting.setTitle("Updated Title");
+        updatedMeeting.setLabel("Updated Label");
+        updatedMeeting.setTimeslot(timeSlot);
+        updatedMeeting.setLocation("Updated Location");
+        updatedMeeting.setLink("https://updated.com");
+        updatedMeeting.setDescription("Updated Description");
+        updatedMeeting.setHost(userId);
+        updatedMeeting.setMeetingRecord("Updated notes");
+
+        when(meetingRepository.findSingleMeetingById(meetingId)).thenReturn(existingMeeting);
+        when(meetingRepository.update(eq(meetingId), any(Meeting.class))).thenReturn(updatedMeeting);
+        when(meetingRepository.findMeetingsById(anyList())).thenReturn(Collections.emptyList());
+        when(meetingRepository.findMeetingsByHost(userId)).thenReturn(Collections.emptyList());
+
+        ResponseMeetingDto result = meetingService.updateMeeting(meetingId, requestUpdateDto);
+
+        assertNotNull(result);
+        assertEquals(meetingId, result.getId());
+        assertEquals("Updated Title", result.getTitle());
+        assertEquals("Updated Label", result.getLabel());
+        assertEquals(timeSlot, result.getTimeslot());
+        assertEquals("Updated Location", result.getLocation());
+        assertEquals("https://updated.com", result.getLink());
+        assertEquals("Updated Description", result.getDescription());
+        assertEquals(userId, result.getHost());
+        assertEquals("Updated notes", result.getMeetingRecord());
+        assertEquals(1, result.getParticipants().size());
+        assertEquals("participant123", result.getParticipants().get(0).getUserId());
+        assertEquals(MeetingParticipant.Status.ACCEPTED, result.getParticipants().get(0).getStatus());
+
+        verify(meetingRepository).findSingleMeetingById(meetingId);
+        verify(meetingRepository).update(eq(meetingId), any(Meeting.class));
+        verify(meetingParticipantRepository).findByUserId(userId);
+        verify(meetingRepository).findMeetingsByHost(userId);
+
+    }
+
+    @Test
+    public void updateMeetingTimeSlotConflict() {
+        String meetingId = "meeting123";
+        String userId = "user456";
+
+        Meeting existingConflictingMeeting = new Meeting();
+        existingConflictingMeeting.setId("otherMeeting");
+        existingConflictingMeeting.setHost(userId);
+        TimeSlot conflictingTimeSlot = convertTimeSlot("2025-12-20T19:00:00.000+00:00", "2025-12-20T21:00:00.000+00:00");
+        existingConflictingMeeting.setTimeslot(conflictingTimeSlot);
+
+        Meeting existingMeeting = new Meeting();
+        existingMeeting.setId(meetingId);
+        existingMeeting.setTitle("Original Title");
+        existingMeeting.setLabel("Original Label");
+        TimeSlot originalTimeSlot = convertTimeSlot("2025-12-15T18:00:00.000+00:00", "2025-12-15T20:00:00.000+00:00");
+        existingMeeting.setTimeslot(originalTimeSlot);
+        existingMeeting.setLocation("Original Location");
+        existingMeeting.setLink("https://original.com");
+        existingMeeting.setDescription("Original Description");
+        existingMeeting.setHost(userId);
+        existingMeeting.setMeetingRecord("Original notes");
+
+        RequestUpdateMeetingDto requestUpdateDto = new RequestUpdateMeetingDto();
+        requestUpdateDto.setTitle("Updated Title");
+        requestUpdateDto.setLabel("Updated Label");
+        TimeSlot newConflictingTimeSlot = convertTimeSlot("2025-12-20T20:00:00.000+00:00", "2025-12-20T22:00:00.000+00:00");
+        requestUpdateDto.setTimeslot(newConflictingTimeSlot);
+        requestUpdateDto.setLocation("Updated Location");
+        requestUpdateDto.setLink("https://updated.com");
+        requestUpdateDto.setDescription("Updated Description");
+        requestUpdateDto.setHost(userId);
+        requestUpdateDto.setMeetingRecord("Updated notes");
+
+
+        when(meetingRepository.findMeetingsByHost(userId)).thenReturn(List.of(existingConflictingMeeting));
+        when(meetingParticipantRepository.findByUserId(userId)).thenReturn(Collections.emptyList());
+        when(meetingRepository.findMeetingsById(anyList())).thenReturn(Collections.emptyList());
+
+
+        assertThrows(TimeSlotConflictException.class, () -> {
+            meetingService.updateMeeting(meetingId, requestUpdateDto);
+        });
+
+        verify(meetingRepository).findMeetingsByHost(userId);
+        verify(meetingRepository).findMeetingsById(anyList());
+        verify(meetingParticipantRepository).findByUserId(userId);
+        verify(meetingRepository, never()).update(anyString(), any(Meeting.class));
+    }
+
+    @Test
+    public void updateMeetingExistingMeetingIsNull() {
+        String meetingId = "nonexistentMeeting";
+        String userId = "user456";
+
+        RequestUpdateMeetingDto requestUpdateDto = new RequestUpdateMeetingDto();
+        requestUpdateDto.setTitle("Updated Title");
+        requestUpdateDto.setLabel("Updated Label");
+        TimeSlot timeSlot = convertTimeSlot("2025-12-15T18:00:00.000+00:00", "2025-12-15T20:00:00.000+00:00");
+        requestUpdateDto.setTimeslot(timeSlot);
+        requestUpdateDto.setLocation("Updated Location");
+        requestUpdateDto.setLink("https://updated.com");
+        requestUpdateDto.setDescription("Updated Description");
+        requestUpdateDto.setHost(userId);
+        requestUpdateDto.setMeetingRecord("Updated notes");
+
+        when(meetingRepository.findMeetingsByHost(userId)).thenReturn(Collections.emptyList());
+        when(meetingParticipantRepository.findByUserId(userId)).thenReturn(Collections.emptyList());
+        when(meetingRepository.findMeetingsById(anyList())).thenReturn(Collections.emptyList());
+        when(meetingRepository.findSingleMeetingById(meetingId)).thenReturn(null);
+
+        assertThrows(NoSuchElementException.class, () -> {
+            meetingService.updateMeeting(meetingId, requestUpdateDto);
+        });
+
+        verify(meetingRepository).findMeetingsByHost(userId);
+        verify(meetingRepository).findSingleMeetingById(meetingId);
+        verify(meetingRepository).findMeetingsById(anyList());
+        verify(meetingParticipantRepository).findByUserId(userId);
+        verify(meetingRepository).update(eq(meetingId), any(Meeting.class));
+
+    }
+
+    @Test
+    public void updateMeetingWithNullParticipants() {
+        String meetingId = "meeting123";
+        String userId = "user456";
+        TimeSlot timeSlot = convertTimeSlot("2025-12-15T18:00:00.000+00:00", "2025-12-15T20:00:00.000+00:00");
+
+        Meeting existingMeeting = new Meeting();
+        existingMeeting.setId(meetingId);
+        existingMeeting.setTitle("Original Title");
+        existingMeeting.setLabel("Original Label");
+        existingMeeting.setTimeslot(timeSlot);
+        existingMeeting.setLocation("Original Location");
+        existingMeeting.setLink("https://original.com");
+        existingMeeting.setDescription("Original Description");
+        existingMeeting.setHost(userId);
+        existingMeeting.setMeetingRecord("Original notes");
+
+        RequestUpdateMeetingDto requestUpdateDto = new RequestUpdateMeetingDto();
+        requestUpdateDto.setTitle("Updated Title");
+        requestUpdateDto.setLabel("Updated Label");
+        requestUpdateDto.setTimeslot(timeSlot);
+        requestUpdateDto.setLocation("Updated Location");
+        requestUpdateDto.setLink("https://updated.com");
+        requestUpdateDto.setDescription("Updated Description");
+        requestUpdateDto.setHost(userId);
+        requestUpdateDto.setMeetingRecord("Updated notes");
+        requestUpdateDto.setParticipants(null);
+
+        Meeting updatedMeeting = new Meeting();
+        updatedMeeting.setId(meetingId);
+        updatedMeeting.setTitle("Updated Title");
+        updatedMeeting.setLabel("Updated Label");
+        updatedMeeting.setTimeslot(timeSlot);
+        updatedMeeting.setLocation("Updated Location");
+        updatedMeeting.setLink("https://updated.com");
+        updatedMeeting.setDescription("Updated Description");
+        updatedMeeting.setHost(userId);
+        updatedMeeting.setMeetingRecord("Updated notes");
+
+        when(meetingRepository.findMeetingsByHost(userId)).thenReturn(Collections.emptyList());
+        when(meetingParticipantRepository.findByUserId(userId)).thenReturn(Collections.emptyList());
+        when(meetingRepository.findMeetingsById(anyList())).thenReturn(Collections.emptyList());
+        when(meetingRepository.findSingleMeetingById(meetingId)).thenReturn(existingMeeting);
+        when(meetingRepository.update(eq(meetingId), any(Meeting.class))).thenReturn(updatedMeeting);
+
+        ResponseMeetingDto result = meetingService.updateMeeting(meetingId, requestUpdateDto);
+
+        assertNotNull(result);
+        assertEquals("Updated Title", result.getTitle());
+        assertEquals("Updated Label", result.getLabel());
+        assertEquals(timeSlot, result.getTimeslot());
+        assertEquals("Updated Location", result.getLocation());
+        assertEquals("https://updated.com", result.getLink());
+        assertEquals("Updated Description", result.getDescription());
+        assertEquals(userId, result.getHost());
+        assertEquals("Updated notes", result.getMeetingRecord());
+        assertEquals(0, result.getParticipants().size());
+
+        verify(meetingRepository).findMeetingsByHost(userId);
+        verify(meetingParticipantRepository).findByUserId(userId);
+        verify(meetingRepository).findMeetingsById(anyList());
+        verify(meetingRepository).findSingleMeetingById(meetingId);
+        verify(meetingRepository, never()).update(anyString(), any(Meeting.class));
     }
 
     @Test
