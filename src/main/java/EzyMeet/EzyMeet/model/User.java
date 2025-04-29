@@ -13,10 +13,17 @@ public class User {
 
     private String googleUid;
     private String email;
-    private String emailVerified;
+    private boolean emailVerified;
     private String providerId;
-    private String metaData;
+
+    @Setter
     private String idToken;
+
+    @Setter
+    private String createdAt;
+
+    @Setter
+    private String lastSignInTime;
 
     @Setter
     private String id;
@@ -25,10 +32,8 @@ public class User {
     private String displayName;
 
     @Setter
-    private String photoUrl;
+    private String photoURL;
 
     @Setter
     private String phoneNumber;
-
-
 }
