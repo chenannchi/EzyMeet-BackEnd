@@ -1,9 +1,6 @@
 package EzyMeet.EzyMeet.service;
 
-import EzyMeet.EzyMeet.dto.RequestCreateMeetingDto;
-import EzyMeet.EzyMeet.dto.RequestUpdateMeetingDto;
-import EzyMeet.EzyMeet.dto.ResponseDetailedMeetingDto;
-import EzyMeet.EzyMeet.dto.ResponseMeetingDto;
+import EzyMeet.EzyMeet.dto.*;
 import EzyMeet.EzyMeet.model.Meeting;
 import EzyMeet.EzyMeet.model.MeetingParticipant;
 
@@ -14,7 +11,7 @@ public interface MeetingService {
 
     List<ResponseMeetingDto> getUserMeetings(String userId);
 
-    ResponseDetailedMeetingDto getSingleMeetingById(String meetingId);
+    ResponseMeetingInfoDto getSingleMeetingById(String meetingId);
 
     ResponseMeetingDto updateMeeting(String meetingId, RequestUpdateMeetingDto requestUpdateDto);
 

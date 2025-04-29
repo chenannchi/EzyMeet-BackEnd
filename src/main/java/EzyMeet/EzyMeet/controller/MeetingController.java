@@ -1,9 +1,6 @@
 package EzyMeet.EzyMeet.controller;
 
-import EzyMeet.EzyMeet.dto.RequestCreateMeetingDto;
-import EzyMeet.EzyMeet.dto.RequestUpdateMeetingDto;
-import EzyMeet.EzyMeet.dto.ResponseDetailedMeetingDto;
-import EzyMeet.EzyMeet.dto.ResponseMeetingDto;
+import EzyMeet.EzyMeet.dto.*;
 import EzyMeet.EzyMeet.exception.TimeSlotConflictException;
 import EzyMeet.EzyMeet.service.MeetingService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,9 +44,9 @@ public class MeetingController {
     }
 
     @GetMapping("/meeting/{meetingId}")
-    public ResponseEntity<ResponseDetailedMeetingDto> getSingleMeetingById(@PathVariable String meetingId) {
+    public ResponseEntity<ResponseMeetingInfoDto> getSingleMeetingById(@PathVariable String meetingId) {
         try {
-            ResponseDetailedMeetingDto response = meetingService.getSingleMeetingById(meetingId);
+            ResponseMeetingInfoDto response = meetingService.getSingleMeetingById(meetingId);
             return ResponseEntity.ok(response);
         } catch (NoSuchElementException e) {
             return ResponseEntity.notFound().build();

@@ -1,16 +1,16 @@
 package EzyMeet.EzyMeet.impl;
 
-import EzyMeet.EzyMeet.dto.RequestCreateMeetingDto;
-import EzyMeet.EzyMeet.dto.RequestUpdateMeetingDto;
-import EzyMeet.EzyMeet.dto.ResponseDetailedMeetingDto;
-import EzyMeet.EzyMeet.dto.ResponseMeetingDto;
+import EzyMeet.EzyMeet.dto.*;
 import EzyMeet.EzyMeet.exception.TimeSlotConflictException;
 import EzyMeet.EzyMeet.model.Meeting;
 import EzyMeet.EzyMeet.model.MeetingParticipant;
 import EzyMeet.EzyMeet.model.TimeSlot;
+import EzyMeet.EzyMeet.model.User;
 import EzyMeet.EzyMeet.repository.MeetingParticipantRepository;
 import EzyMeet.EzyMeet.repository.MeetingRepository;
+import EzyMeet.EzyMeet.repository.UserRepository;
 import EzyMeet.EzyMeet.service.MeetingService;
+import com.google.cloud.spring.data.firestore.FirestoreReactiveOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,11 +23,13 @@ public class MeetingServiceImpl implements MeetingService {
 
     private final MeetingRepository meetingRepository;
     private final MeetingParticipantRepository meetingParticipantRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public MeetingServiceImpl(MeetingRepository meetingRepository, MeetingParticipantRepository meetingParticipantRepository) {
+    public MeetingServiceImpl(MeetingRepository meetingRepository, MeetingParticipantRepository meetingParticipantRepository, UserRepository userRepository) {
         this.meetingRepository = meetingRepository;
         this.meetingParticipantRepository = meetingParticipantRepository;
+        this.userRepository = userRepository;
     }
 
     public ResponseMeetingDto createMeeting(RequestCreateMeetingDto requestDto) {
@@ -101,7 +103,8 @@ public class MeetingServiceImpl implements MeetingService {
         return allMeetings;
     }
 
-    public ResponseDetailedMeetingDto getSingleMeetingById(String meetingId) {
+    public ResponseMeetingInfoDto getSingleMeetingById(String meetingId) {
+
         Meeting meeting = meetingRepository.findSingleMeetingById(meetingId);
         if (meeting == null) {
             throw new NoSuchElementException("Meeting not found with ID: " + meetingId);
@@ -109,14 +112,20 @@ public class MeetingServiceImpl implements MeetingService {
 
         List<MeetingParticipant> participants = meetingParticipantRepository.findByMeetingId(meetingId);
 
-        List<ResponseMeetingDto.ResponseParticipantDto> invited = new ArrayList<>();
-        List<ResponseMeetingDto.ResponseParticipantDto> accepted = new ArrayList<>();
-        List<ResponseMeetingDto.ResponseParticipantDto> declined = new ArrayList<>();
+        List<ResponseMeetingInfoDto.ResponseParticipantDto> invited = new ArrayList<>();
+        List<ResponseMeetingInfoDto.ResponseParticipantDto> accepted = new ArrayList<>();
+        List<ResponseMeetingInfoDto.ResponseParticipantDto> declined = new ArrayList<>();
 
         for (MeetingParticipant participant : participants) {
-            ResponseMeetingDto.ResponseParticipantDto dto = ResponseMeetingDto.ResponseParticipantDto.builder()
+                User user = userRepository.findByUserId(participant.getUserId());
+                if (user == null) {
+                    continue;
+                }
+
+            ResponseMeetingInfoDto.ResponseParticipantDto dto = ResponseMeetingInfoDto.ResponseParticipantDto.builder()
                     .userId(participant.getUserId())
-                    .status(participant.getStatus())
+                    .email(user.getEmail())
+                    .name(user.getDisplayName())
                     .build();
 
             switch (participant.getStatus()) {
@@ -132,7 +141,7 @@ public class MeetingServiceImpl implements MeetingService {
             }
         }
 
-        return ResponseDetailedMeetingDto.builder()
+        return ResponseMeetingInfoDto.builder()
                 .id(meeting.getId())
                 .title(meeting.getTitle())
                 .label(meeting.getLabel())

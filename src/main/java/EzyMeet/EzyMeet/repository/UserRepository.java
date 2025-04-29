@@ -55,5 +55,20 @@ public class UserRepository {
         }
     }
 
+    public User findByUserId(String userId) {
+        try {
+            DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(userId);
+            ApiFuture<DocumentSnapshot> future = docRef.get();
+            DocumentSnapshot document = future.get();
+            if (document.exists()) {
+                return document.toObject(User.class);
+            } else {
+                return null;
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Failed to fetch user from Firestore", e);
+        }
+    }
+
 
 }
