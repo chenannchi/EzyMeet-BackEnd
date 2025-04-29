@@ -190,12 +190,15 @@ public class MeetingServiceImpl implements MeetingService {
 //
 //            participantDtos = requestUpdateDto.getParticipants();
 //        }
-        List<ResponseMeetingDto.ResponseParticipantDto> participantDtos = requestUpdateDto.getParticipants().stream()
-                .map(dto -> ResponseMeetingDto.ResponseParticipantDto.builder()
-                        .userId(dto.getUserId())
-                        .status(dto.getStatus())
-                        .build())
-                .collect(Collectors.toList());
+        List<ResponseMeetingDto.ResponseParticipantDto> participantDtos = new ArrayList<>();
+        if (requestUpdateDto.getParticipants() != null) {
+            participantDtos = requestUpdateDto.getParticipants().stream()
+                    .map(dto -> ResponseMeetingDto.ResponseParticipantDto.builder()
+                            .userId(dto.getUserId())
+                            .status(dto.getStatus())
+                            .build())
+                    .collect(Collectors.toList());
+        }
 
 
         return ResponseMeetingDto.builder()
@@ -220,39 +223,39 @@ public class MeetingServiceImpl implements MeetingService {
                 .build();
     }
 
-    private void syncParticipants(String meetingId, List<MeetingParticipant> newParticipants) {
-        List<MeetingParticipant> originalParticipants = meetingParticipantRepository.findByMeetingId(meetingId);
-        Map<String, MeetingParticipant> originalParticipantMap = originalParticipants.stream()
-                .collect(Collectors.toMap(MeetingParticipant::getUserId, Function.identity()));
-
-        Set<String> incomingUserIds = newParticipants == null
-                ? Collections.emptySet()
-                : newParticipants.stream()
-                .map(MeetingParticipant::getUserId)
-                .collect(Collectors.toSet());
-
-        newParticipants.stream()
-                .filter(p -> !originalParticipantMap.containsKey(p.getUserId()))
-                .forEach(p -> {
-                    p.setMeetingId(meetingId);
-                    p.setId(null);
-                    meetingParticipantRepository.create(p);
-                });
-
-        originalParticipants.stream()
-                .filter(p -> !incomingUserIds.contains(p.getUserId()))
-                .forEach(p -> meetingParticipantRepository.delete(p.getId()));
-
-        newParticipants.stream()
-                .filter(p -> originalParticipantMap.containsKey(p.getUserId()))
-                .filter(p -> !Objects.equals(originalParticipantMap.get(p.getUserId()).getStatus(), p.getStatus()))
-                .forEach(p -> {
-                    MeetingParticipant existingParticipant = originalParticipantMap.get(p.getUserId());
-                    p.setId(existingParticipant.getId());
-                    p.setMeetingId(meetingId);
-                    meetingParticipantRepository.update(existingParticipant.getId(), p);
-                });
-    }
+//    private void syncParticipants(String meetingId, List<MeetingParticipant> newParticipants) {
+//        List<MeetingParticipant> originalParticipants = meetingParticipantRepository.findByMeetingId(meetingId);
+//        Map<String, MeetingParticipant> originalParticipantMap = originalParticipants.stream()
+//                .collect(Collectors.toMap(MeetingParticipant::getUserId, Function.identity()));
+//
+//        Set<String> incomingUserIds = newParticipants == null
+//                ? Collections.emptySet()
+//                : newParticipants.stream()
+//                .map(MeetingParticipant::getUserId)
+//                .collect(Collectors.toSet());
+//
+//        newParticipants.stream()
+//                .filter(p -> !originalParticipantMap.containsKey(p.getUserId()))
+//                .forEach(p -> {
+//                    p.setMeetingId(meetingId);
+//                    p.setId(null);
+//                    meetingParticipantRepository.create(p);
+//                });
+//
+//        originalParticipants.stream()
+//                .filter(p -> !incomingUserIds.contains(p.getUserId()))
+//                .forEach(p -> meetingParticipantRepository.delete(p.getId()));
+//
+//        newParticipants.stream()
+//                .filter(p -> originalParticipantMap.containsKey(p.getUserId()))
+//                .filter(p -> !Objects.equals(originalParticipantMap.get(p.getUserId()).getStatus(), p.getStatus()))
+//                .forEach(p -> {
+//                    MeetingParticipant existingParticipant = originalParticipantMap.get(p.getUserId());
+//                    p.setId(existingParticipant.getId());
+//                    p.setMeetingId(meetingId);
+//                    meetingParticipantRepository.update(existingParticipant.getId(), p);
+//                });
+//    }
 
     private ResponseMeetingDto convertMeetingToDto(Meeting meeting) {
         List<MeetingParticipant> participants =
@@ -285,9 +288,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .anyMatch(existingTimeSlot -> existingTimeSlot.conflictsWith(newTimeSlot));
     }
 
-
-
-    public List<TimeSlot> getUserMeetingTimeSlotsExcludeCurrentMeeting(String userId, String meetingIdToExclude) {
+    private List<TimeSlot> getUserMeetingTimeSlotsExcludeCurrentMeeting(String userId, String meetingIdToExclude) {
         return getUserAllMeetings(userId).stream()
                 .filter(meeting -> !meeting.getId().equals(meetingIdToExclude))
                 .map(Meeting::getTimeslot)
