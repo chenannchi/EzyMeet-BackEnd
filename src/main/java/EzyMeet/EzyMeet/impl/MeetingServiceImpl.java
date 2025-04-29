@@ -296,7 +296,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .collect(Collectors.toList());
     }
 
-    public List<TimeSlot> getUserMeetingTimeSlots(String userId) {
+    private List<TimeSlot> getUserMeetingTimeSlots(String userId) {
         return getUserAllMeetings(userId).stream()
                 .map(Meeting::getTimeslot)
                 .collect(Collectors.toList());
