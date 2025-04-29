@@ -1,15 +1,14 @@
 package EzyMeet.EzyMeet.impl;
 
-import EzyMeet.EzyMeet.dto.RequestCreateMeetingDto;
-import EzyMeet.EzyMeet.dto.RequestUpdateMeetingDto;
-import EzyMeet.EzyMeet.dto.ResponseDetailedMeetingDto;
-import EzyMeet.EzyMeet.dto.ResponseMeetingDto;
+import EzyMeet.EzyMeet.dto.*;
 import EzyMeet.EzyMeet.exception.TimeSlotConflictException;
 import EzyMeet.EzyMeet.model.Meeting;
 import EzyMeet.EzyMeet.model.MeetingParticipant;
 import EzyMeet.EzyMeet.model.TimeSlot;
+import EzyMeet.EzyMeet.model.User;
 import EzyMeet.EzyMeet.repository.MeetingParticipantRepository;
 import EzyMeet.EzyMeet.repository.MeetingRepository;
+import EzyMeet.EzyMeet.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,14 +30,16 @@ public class MeetingServiceImplTest {
     private MeetingRepository meetingRepository;
     @Mock
     private MeetingParticipantRepository meetingParticipantRepository;
+    @Mock
+    private UserRepository userRepository;
     @InjectMocks
     private MeetingServiceImpl meetingService;
 
     @Test
     public void createMeetingSuccess() {
 
-        String startTimeStr = "2023-12-15T18:00:00.000+00:00";
-        String endTimeStr = "2023-12-15T20:00:00.000+00:00";
+        String startTimeStr = "2025-12-15T18:00:00.000+00:00";
+        String endTimeStr = "2025-12-15T20:00:00.000+00:00";
         TimeSlot timeSlot = convertTimeSlot(startTimeStr, endTimeStr);
 
         RequestCreateMeetingDto requestDto = new RequestCreateMeetingDto();
@@ -291,7 +292,55 @@ public void createMeetingTimeSlotConflict() {
         when(meetingRepository.findSingleMeetingById(meetingId)).thenReturn(meeting);
         when(meetingParticipantRepository.findByMeetingId(meetingId)).thenReturn(participants);
 
-        ResponseDetailedMeetingDto result = meetingService.getSingleMeetingById(meetingId);
+
+        User userInvited = new User(
+                "google-123",
+                "invited@example.com",
+                false,
+                "google.com",
+                null,
+                null,
+                null,
+                "userInvited",
+                "Invited User",
+                null,
+                null
+        );
+
+
+        User userAccepted = new User(
+                "google-123",
+                "accepted@example.com",
+                false,
+                "google.com",
+                null,
+                null,
+                null,
+                "userAccepted",
+                "Accepted User",
+                null,
+                null
+        );
+
+        User userDeclined = new User(
+                "google-123",
+                "declined@example.com",
+                false,
+                "google.com",
+                null,
+                null,
+                null,
+                "userDeclined",
+                "Declined User",
+                null,
+                null
+        );
+
+        when(userRepository.findByUserId("userInvited")).thenReturn(userInvited);
+        when(userRepository.findByUserId("userAccepted")).thenReturn(userAccepted);
+        when(userRepository.findByUserId("userDeclined")).thenReturn(userDeclined);
+
+        ResponseMeetingInfoDto result = meetingService.getSingleMeetingById(meetingId);
 
         assertNotNull(result);
         assertEquals(meetingId, result.getId());
@@ -306,18 +355,24 @@ public void createMeetingTimeSlotConflict() {
 
         assertEquals(1, result.getInvitedParticipants().size());
         assertEquals("userInvited", result.getInvitedParticipants().get(0).getUserId());
-        assertEquals(MeetingParticipant.Status.INVITED, result.getInvitedParticipants().get(0).getStatus());
+        assertEquals("invited@example.com", result.getInvitedParticipants().get(0).getEmail());
+        assertEquals("Invited User", result.getInvitedParticipants().get(0).getName());
 
         assertEquals(1, result.getAcceptedParticipants().size());
         assertEquals("userAccepted", result.getAcceptedParticipants().get(0).getUserId());
-        assertEquals(MeetingParticipant.Status.ACCEPTED, result.getAcceptedParticipants().get(0).getStatus());
+        assertEquals("accepted@example.com", result.getAcceptedParticipants().get(0).getEmail());
+        assertEquals("Accepted User", result.getAcceptedParticipants().get(0).getName());
 
         assertEquals(1, result.getDeclinedParticipants().size());
         assertEquals("userDeclined", result.getDeclinedParticipants().get(0).getUserId());
-        assertEquals(MeetingParticipant.Status.DECLINED, result.getDeclinedParticipants().get(0).getStatus());
+        assertEquals("declined@example.com", result.getDeclinedParticipants().get(0).getEmail());
+        assertEquals("Declined User", result.getDeclinedParticipants().get(0).getName());
 
         verify(meetingRepository).findSingleMeetingById(meetingId);
         verify(meetingParticipantRepository).findByMeetingId(meetingId);
+        verify(userRepository).findByUserId("userInvited");
+        verify(userRepository).findByUserId("userAccepted");
+        verify(userRepository).findByUserId("userDeclined");
     }
 
     @Test

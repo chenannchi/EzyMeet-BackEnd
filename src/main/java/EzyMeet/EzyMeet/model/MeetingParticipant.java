@@ -1,6 +1,7 @@
 package EzyMeet.EzyMeet.model;
 
 import jakarta.persistence.Id;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -8,6 +9,7 @@ import lombok.Setter;
 import java.util.UUID;
 @Setter
 @Getter
+@AllArgsConstructor
 @NoArgsConstructor
 public class MeetingParticipant {
     private String id;
@@ -19,12 +21,5 @@ public class MeetingParticipant {
         INVITED,
         ACCEPTED,
         DECLINED
-    }
-
-    public MeetingParticipant(String id, String userId, String meetingId, Status status) {
-        this.id = id;
-        this.userId = userId;
-        this.meetingId = meetingId;
-        this.status = status;
     }
 }

@@ -77,13 +77,13 @@ public class UserServiceImplTest {
                 "test@example.com",
                 false,
                 "google.com",
-                null,
-                null,
-                null,
+                "123",
+                "2025-12-15T18:00:00.000+00:00",
+                "2025-12-15T18:00:00.000+00:00",
                 "existing-user-123",
                 "Test User",
-                null,
-                null
+                "photo-url.jpg",
+                "0987654321"
         );
 
         User updatedUser = new User(
@@ -91,13 +91,13 @@ public class UserServiceImplTest {
                 "test@example.com",
                 false,
                 "google.com",
-                null,
-                null,
-                null,
+                "123",
+                "2025-12-15T18:00:00.000+00:00",
+                "2025-12-15T18:00:00.000+00:00",
                 "existing-user-123",
-                "Updated User Name", // Changed display name
-                null,
-                null
+                "Updated User Name",
+                "photo-url.jpg",
+                "0987654321"
         );
 
         when(userRepository.update(userToUpdate)).thenReturn(updatedUser);
