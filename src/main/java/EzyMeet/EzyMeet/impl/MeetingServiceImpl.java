@@ -83,6 +83,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .map(this::convertMeetingToDto)
                 .collect(Collectors.toList());
     }
+
     private List<Meeting> getUserAllMeetings(String userId) {
         List<String> participantMeetingIds = meetingParticipantRepository.findByUserId(userId)
                 .stream()
@@ -146,11 +147,10 @@ public class MeetingServiceImpl implements MeetingService {
 
 
     public RequestUpdateMeetingDto updateMeeting(String meetingId, RequestUpdateMeetingDto requestUpdateDto) {
-// FIXME:
-//        List<TimeSlot> userMeetingTimeSlotsExceptCurrent = getUserMeetingTimeSlotsExcludeCurrentMeeting(requestUpdateDto.getHost(), meetingId);
-//        if (isTimeSlotConflict(requestUpdateDto.getTimeslot(), userMeetingTimeSlotsExceptCurrent)) {
-//            throw new TimeSlotConflictException("The provided time slot conflicts with existing time slots.");
-//        }
+        List<TimeSlot> userMeetingTimeSlotsExceptCurrent = getUserMeetingTimeSlotsExcludeCurrentMeeting(requestUpdateDto.getHost(), meetingId);
+        if (isTimeSlotConflict(requestUpdateDto.getTimeslot(), userMeetingTimeSlotsExceptCurrent)) {
+            throw new TimeSlotConflictException("The provided time slot conflicts with existing time slots.");
+        }
 
         Meeting existingMeeting = meetingRepository.findSingleMeetingById(meetingId);
         if (existingMeeting == null) {
