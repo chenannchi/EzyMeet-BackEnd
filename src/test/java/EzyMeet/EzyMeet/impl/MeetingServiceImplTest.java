@@ -483,7 +483,7 @@ public void createMeetingTimeSlotConflict() {
         verify(meetingRepository).findSingleMeetingById(meetingId);
         verify(meetingRepository).findMeetingsById(anyList());
         verify(meetingParticipantRepository).findByUserId(userId);
-        verify(meetingRepository).update(eq(meetingId), any(Meeting.class));
+        verify(meetingRepository, never()).update(eq(meetingId), any(Meeting.class));
 
     }
 
@@ -549,7 +549,7 @@ public void createMeetingTimeSlotConflict() {
         verify(meetingParticipantRepository).findByUserId(userId);
         verify(meetingRepository).findMeetingsById(anyList());
         verify(meetingRepository).findSingleMeetingById(meetingId);
-        verify(meetingRepository, never()).update(anyString(), any(Meeting.class));
+        verify(meetingRepository).update(anyString(), any(Meeting.class));
     }
 
     @Test
