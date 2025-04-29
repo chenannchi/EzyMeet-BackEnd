@@ -78,20 +78,24 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
     public List<ResponseMeetingDto> getUserMeetings(String userId) {
-        List<MeetingParticipant> joinedMeetings = meetingParticipantRepository.findByUserId(userId);
-        List<String> meetingIds = joinedMeetings.stream()
-                .map(MeetingParticipant::getMeetingId)
-                .collect(Collectors.toList());
-
-        if (meetingIds.isEmpty()) {
-            return new ArrayList<>();
-        }
-
-        List<Meeting> meetings = meetingRepository.findMeetingsById(meetingIds);
-
+        List<Meeting> meetings = getUserAllMeetings(userId);
         return  meetings.stream()
                 .map(this::convertMeetingToDto)
                 .collect(Collectors.toList());
+    }
+    private List<Meeting> getUserAllMeetings(String userId) {
+        List<String> participantMeetingIds = meetingParticipantRepository.findByUserId(userId)
+                .stream()
+                .map(MeetingParticipant::getMeetingId)
+                .collect(Collectors.toList());
+
+        List<Meeting> hostedMeetings = meetingRepository.findMeetingsByHost(userId);
+        List<Meeting> participantMeetings = meetingRepository.findMeetingsById(participantMeetingIds);
+
+        List<Meeting> allMeetings = new ArrayList<>(participantMeetings);
+        allMeetings.addAll(hostedMeetings);
+
+        return allMeetings;
     }
 
     public ResponseDetailedMeetingDto getSingleMeetingById(String meetingId) {
@@ -267,20 +271,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .anyMatch(existingTimeSlot -> existingTimeSlot.conflictsWith(newTimeSlot));
     }
 
-    private List<Meeting> getUserAllMeetings(String userId) {
-        List<String> participantMeetingIds = meetingParticipantRepository.findByUserId(userId)
-                .stream()
-                .map(MeetingParticipant::getMeetingId)
-                .collect(Collectors.toList());
 
-        List<Meeting> hostedMeetings = meetingRepository.findMeetingsByHost(userId);
-        List<Meeting> participantMeetings = meetingRepository.findMeetingsById(participantMeetingIds);
-
-        List<Meeting> allMeetings = new ArrayList<>(participantMeetings);
-        allMeetings.addAll(hostedMeetings);
-
-        return allMeetings;
-    }
 
     public List<TimeSlot> getUserMeetingTimeSlotsExcludeCurrentMeeting(String userId, String meetingIdToExclude) {
         return getUserAllMeetings(userId).stream()
