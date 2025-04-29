@@ -24,14 +24,15 @@ public class ResponseMeetingDto {
     private String link;
     private String description;
     private String host;
-    private List<ParticipantResponseDto> participants;
+    private List<ResponseParticipantDto> participants;
+    private String meetingRecord;
 
     @Getter
     @Setter
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
-    public static class ParticipantResponseDto {
+    public static class ResponseParticipantDto {
         private String userId;
         private MeetingParticipant.Status status;
     }

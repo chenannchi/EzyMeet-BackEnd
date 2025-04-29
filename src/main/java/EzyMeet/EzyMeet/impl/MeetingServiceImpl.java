@@ -44,10 +44,11 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setLink(requestDto.getLink());
         meeting.setDescription(requestDto.getDescription());
         meeting.setHost(requestDto.getHost());
+        meeting.setMeetingRecord("");
 
         Meeting savedMeeting = meetingRepository.create(meeting);
 
-        List<ResponseMeetingDto.ParticipantResponseDto> participantResponses = new ArrayList<>();
+        List<ResponseMeetingDto.ResponseParticipantDto> participantResponses = new ArrayList<>();
         if (requestDto.getParticipants() != null) {
             for (RequestCreateMeetingDto.RequestParticipantDto participantDto : requestDto.getParticipants()) {
                 MeetingParticipant participant = new MeetingParticipant();
@@ -57,7 +58,7 @@ public class MeetingServiceImpl implements MeetingService {
 
                 MeetingParticipant savedParticipant = meetingParticipantRepository.create(participant);
 
-                participantResponses.add(ResponseMeetingDto.ParticipantResponseDto.builder()
+                participantResponses.add(ResponseMeetingDto.ResponseParticipantDto.builder()
                         .userId(savedParticipant.getUserId())
                         .status(savedParticipant.getStatus())
                         .build());
@@ -74,6 +75,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .description(savedMeeting.getDescription())
                 .host(savedMeeting.getHost())
                 .participants(participantResponses)
+                .meetingRecord(savedMeeting.getMeetingRecord())
                 .build();
     }
 
@@ -107,12 +109,12 @@ public class MeetingServiceImpl implements MeetingService {
 
         List<MeetingParticipant> participants = meetingParticipantRepository.findByMeetingId(meetingId);
 
-        List<ResponseMeetingDto.ParticipantResponseDto> invited = new ArrayList<>();
-        List<ResponseMeetingDto.ParticipantResponseDto> accepted = new ArrayList<>();
-        List<ResponseMeetingDto.ParticipantResponseDto> declined = new ArrayList<>();
+        List<ResponseMeetingDto.ResponseParticipantDto> invited = new ArrayList<>();
+        List<ResponseMeetingDto.ResponseParticipantDto> accepted = new ArrayList<>();
+        List<ResponseMeetingDto.ResponseParticipantDto> declined = new ArrayList<>();
 
         for (MeetingParticipant participant : participants) {
-            ResponseMeetingDto.ParticipantResponseDto dto = ResponseMeetingDto.ParticipantResponseDto.builder()
+            ResponseMeetingDto.ResponseParticipantDto dto = ResponseMeetingDto.ResponseParticipantDto.builder()
                     .userId(participant.getUserId())
                     .status(participant.getStatus())
                     .build();
@@ -139,6 +141,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .link(meeting.getLink())
                 .description(meeting.getDescription())
                 .host(meeting.getHost())
+                .meetingRecord(meeting.getMeetingRecord())
                 .invitedParticipants(invited)
                 .acceptedParticipants(accepted)
                 .declinedParticipants(declined)
@@ -146,7 +149,7 @@ public class MeetingServiceImpl implements MeetingService {
     }
 
 
-    public RequestUpdateMeetingDto updateMeeting(String meetingId, RequestUpdateMeetingDto requestUpdateDto) {
+    public ResponseMeetingDto updateMeeting(String meetingId, RequestUpdateMeetingDto requestUpdateDto) {
         List<TimeSlot> userMeetingTimeSlotsExceptCurrent = getUserMeetingTimeSlotsExcludeCurrentMeeting(requestUpdateDto.getHost(), meetingId);
         if (isTimeSlotConflict(requestUpdateDto.getTimeslot(), userMeetingTimeSlotsExceptCurrent)) {
             throw new TimeSlotConflictException("The provided time slot conflicts with existing time slots.");
@@ -166,6 +169,7 @@ public class MeetingServiceImpl implements MeetingService {
         updatedMeeting.setLink(requestUpdateDto.getLink());
         updatedMeeting.setDescription(requestUpdateDto.getDescription());
         updatedMeeting.setHost(requestUpdateDto.getHost());
+        updatedMeeting.setMeetingRecord(requestUpdateDto.getMeetingRecord());
 
         Meeting savedMeeting = meetingRepository.update(meetingId, updatedMeeting);
 
@@ -186,8 +190,16 @@ public class MeetingServiceImpl implements MeetingService {
 //
 //            participantDtos = requestUpdateDto.getParticipants();
 //        }
-        List<RequestUpdateMeetingDto.RequestParticipantDto> participantDtos = requestUpdateDto.getParticipants();
-        return RequestUpdateMeetingDto.builder()
+        List<ResponseMeetingDto.ResponseParticipantDto> participantDtos = requestUpdateDto.getParticipants().stream()
+                .map(dto -> ResponseMeetingDto.ResponseParticipantDto.builder()
+                        .userId(dto.getUserId())
+                        .status(dto.getStatus())
+                        .build())
+                .collect(Collectors.toList());
+
+
+        return ResponseMeetingDto.builder()
+                .id(savedMeeting.getId())
                 .title(savedMeeting.getTitle())
                 .label(savedMeeting.getLabel())
                 .timeslot(savedMeeting.getTimeslot())
@@ -196,6 +208,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .description(savedMeeting.getDescription())
                 .host(savedMeeting.getHost())
                 .participants(participantDtos)
+                .meetingRecord(savedMeeting.getMeetingRecord())
                 .build();
     }
 
@@ -245,9 +258,9 @@ public class MeetingServiceImpl implements MeetingService {
         List<MeetingParticipant> participants =
                 meetingParticipantRepository.findByMeetingId(meeting.getId());
 
-        List<ResponseMeetingDto.ParticipantResponseDto> participantDtos =
+        List<ResponseMeetingDto.ResponseParticipantDto> participantDtos =
                 participants.stream()
-                        .map(p -> ResponseMeetingDto.ParticipantResponseDto.builder()
+                        .map(p -> ResponseMeetingDto.ResponseParticipantDto.builder()
                                 .userId(p.getUserId())
                                 .status(p.getStatus())
                                 .build())
@@ -263,6 +276,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .description(meeting.getDescription())
                 .host(meeting.getHost())
                 .participants(participantDtos)
+                .meetingRecord(meeting.getMeetingRecord())
                 .build();
     }
 
@@ -286,8 +300,4 @@ public class MeetingServiceImpl implements MeetingService {
                 .map(Meeting::getTimeslot)
                 .collect(Collectors.toList());
     }
-    //    public MeetingRecord createMeetingRecord(String meetingId, MeetingRecord meetingRecord) {
-//        meetingRecord.setMeetingId(meetingId);
-//        return meetingRecordRepository.create(meetingRecord);
-//    }
 }

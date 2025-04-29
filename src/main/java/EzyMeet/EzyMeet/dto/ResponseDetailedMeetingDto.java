@@ -1,6 +1,5 @@
 package EzyMeet.EzyMeet.dto;
 
-import EzyMeet.EzyMeet.model.MeetingParticipant;
 import EzyMeet.EzyMeet.model.TimeSlot;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,7 +17,8 @@ public class ResponseDetailedMeetingDto {
     private String link;
     private String description;
     private String host;
-    private List<ResponseMeetingDto.ParticipantResponseDto> invitedParticipants;
-    private List<ResponseMeetingDto.ParticipantResponseDto> acceptedParticipants;
-    private List<ResponseMeetingDto.ParticipantResponseDto> declinedParticipants;
+    private String meetingRecord;
+    private List<ResponseMeetingDto.ResponseParticipantDto> invitedParticipants;
+    private List<ResponseMeetingDto.ResponseParticipantDto> acceptedParticipants;
+    private List<ResponseMeetingDto.ResponseParticipantDto> declinedParticipants;
 }

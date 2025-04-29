@@ -15,4 +15,5 @@ public class Meeting {
     private String link;
     private String description;
     private String host;
+    private String meetingRecord;
 }

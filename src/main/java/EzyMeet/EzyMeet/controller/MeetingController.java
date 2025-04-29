@@ -5,8 +5,6 @@ import EzyMeet.EzyMeet.dto.RequestUpdateMeetingDto;
 import EzyMeet.EzyMeet.dto.ResponseDetailedMeetingDto;
 import EzyMeet.EzyMeet.dto.ResponseMeetingDto;
 import EzyMeet.EzyMeet.exception.TimeSlotConflictException;
-import EzyMeet.EzyMeet.model.Meeting;
-import EzyMeet.EzyMeet.model.MeetingRecord;
 import EzyMeet.EzyMeet.service.MeetingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -61,7 +59,7 @@ public class MeetingController {
     @PostMapping("/update/{meetingId}")
     public ResponseEntity<?> updateMeeting(@PathVariable String meetingId, @RequestBody RequestUpdateMeetingDto requestUpdateDto) {
         try {
-            RequestUpdateMeetingDto updatedMeeting = meetingService.updateMeeting(meetingId, requestUpdateDto);
+            ResponseMeetingDto updatedMeeting = meetingService.updateMeeting(meetingId, requestUpdateDto);
             return ResponseEntity.ok(updatedMeeting);
         } catch (TimeSlotConflictException e) {
             Map<String, String> errorResponse = new HashMap<>();
@@ -75,10 +73,4 @@ public class MeetingController {
         ResponseMeetingDto deletedMeeting = meetingService.deleteMeeting(meetingId);
         return ResponseEntity.ok(deletedMeeting.getTitle());
     }
-
-//    @PostMapping("{meetingId}/meetingRecord")
-//    public ResponseEntity<MeetingRecord> createMeetingRecord(@PathVariable String meetingId, MeetingRecord meetingRecord) {
-//        MeetingRecord createMeetingRecord = meetingService.createMeetingRecord(meetingId, meetingRecord);
-//        return ResponseEntity.ok(createMeetingRecord);
-//    }
 }

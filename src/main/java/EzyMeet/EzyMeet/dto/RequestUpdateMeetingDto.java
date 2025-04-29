@@ -21,6 +21,7 @@ public class RequestUpdateMeetingDto {
     private String link;
     private String description;
     private String host;
+    private String meetingRecord;
     private List<RequestParticipantDto> participants;
 
     @Data

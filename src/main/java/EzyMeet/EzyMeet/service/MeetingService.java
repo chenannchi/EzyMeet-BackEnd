@@ -16,7 +16,7 @@ public interface MeetingService {
 
     ResponseDetailedMeetingDto getSingleMeetingById(String meetingId);
 
-    RequestUpdateMeetingDto updateMeeting(String meetingId, RequestUpdateMeetingDto requestUpdateDto);
+    ResponseMeetingDto updateMeeting(String meetingId, RequestUpdateMeetingDto requestUpdateDto);
 
     ResponseMeetingDto deleteMeeting(String meetingId);
 }
