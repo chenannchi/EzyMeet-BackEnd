@@ -16,5 +16,5 @@ public interface UserService {
 
     User getUserById(String userId);
 
-    List<Map<String, String>> getAllParticipantOptions();
+    List<Map<String, String>> getAllParticipantOptions(String loginUserId);
 }

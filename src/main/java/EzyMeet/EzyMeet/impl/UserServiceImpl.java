@@ -52,8 +52,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<Map<String, String>> getAllParticipantOptions() {
+    public List<Map<String, String>> getAllParticipantOptions(String loginUserId)  {
         return userRepository.findAll().stream()
+                .filter(user -> !user.getId().equals(loginUserId))
                 .map(user -> Map.of("id", user.getId(), "email", user.getEmail(), "displayName", user.getDisplayName()))
                 .collect(Collectors.toList());
     }

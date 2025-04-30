@@ -38,9 +38,9 @@ public class UserController {
         return ResponseEntity.ok(syncedUser);
     }
 
-    @GetMapping("/participant-options")
-    public ResponseEntity<List<Map<String, String>>> getAllParticipantOptions() {
-        List<Map<String, String>> emailsAndIds = userService.getAllParticipantOptions();
+    @GetMapping("/participant-options/{loginUserId}")
+    public ResponseEntity<List<Map<String, String>>> getAllParticipantOptions(@PathVariable String loginUserId) {
+        List<Map<String, String>> emailsAndIds = userService.getAllParticipantOptions(loginUserId);
         return ResponseEntity.ok(emailsAndIds);
     }
 

@@ -300,19 +300,14 @@ public class UserServiceImplTest {
         List<User> users = Arrays.asList(user1, user2);
         when(userRepository.findAll()).thenReturn(users);
 
-        List<Map<String, String>> result = userService.getAllParticipantOptions();
+        List<Map<String, String>> result = userService.getAllParticipantOptions("user-id-1");
 
-        assertEquals(2, result.size());
+        assertEquals(1, result.size());
 
         Map<String, String> firstUser = result.get(0);
-        assertEquals("user-id-1", firstUser.get("id"));
-        assertEquals("user1@example.com", firstUser.get("email"));
-        assertEquals("User One", firstUser.get("displayName"));
-
-        Map<String, String> secondUser = result.get(1);
-        assertEquals("user-id-2", secondUser.get("id"));
-        assertEquals("user2@example.com", secondUser.get("email"));
-        assertEquals("User Two", secondUser.get("displayName"));
+        assertEquals("user-id-2", firstUser.get("id"));
+        assertEquals("user2@example.com", firstUser.get("email"));
+        assertEquals("User Two", firstUser.get("displayName"));
 
         verify(userRepository).findAll();
     }
