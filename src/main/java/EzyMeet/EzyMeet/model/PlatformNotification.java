@@ -26,6 +26,7 @@ public class PlatformNotification {
 
     public enum Status {
         PENDING,
-        REPLIED
+        ACCEPTED,
+        REJECTED,
     }
 }

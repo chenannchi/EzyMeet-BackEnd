@@ -43,15 +43,18 @@ public class NotificationRepository {
             throw new RuntimeException("Failed to fetch notifications for user: " + userId, e);
         }
     }
-//
-//    public void replyInvitation(String notificationId, boolean accepted) {
-//        try {
-//            DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(notificationId);
-//            ApiFuture<WriteResult> future = docRef.update("invitationReplied", true, "invitationAccepted", accepted);
-//            future.get();
-//        } catch (InterruptedException | ExecutionException e) {
-//            throw new RuntimeException("Failed to reply to invitation for notification: " + notificationId, e);
-//        }
-//    }
+
+        public void replyInvitation(String notificationId, PlatformNotification.Status status) {
+        if (notificationId == null || status == null) {
+            throw new IllegalArgumentException("Notification ID and status must not be null");
+        }
+        try {
+            DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(notificationId);
+            ApiFuture<WriteResult> future = docRef.update("status", status);
+            future.get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Failed to reply to invitation for notification: " + notificationId, e);
+        }
+    }
 
 }

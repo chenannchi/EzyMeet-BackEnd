@@ -1,5 +1,6 @@
 package EzyMeet.EzyMeet.controller;
 
+import EzyMeet.EzyMeet.dto.RequestReplyInvitationDTO;
 import EzyMeet.EzyMeet.model.PlatformNotification;
 import EzyMeet.EzyMeet.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +14,11 @@ public class NotificationController {
     @Autowired
     private NotificationService notificationService;
 
-//    @PostMapping("/replyInvitation")
-//    public void replyInvitation(@RequestParam String userId, @RequestParam String meetingId, @RequestParam PlatformNotification.Status status) {
-//        notificationService.replyInvitation(userId, meetingId, status);
-//    }
-//
+    @PostMapping("/replyInvitation")
+    public void replyInvitation(@RequestBody RequestReplyInvitationDTO request) {
+        notificationService.replyInvitation(request.getNotificationId(), request.getStatus());
+    }
+
     @GetMapping("/{userId}")
     public List<PlatformNotification> getUserNotifications(@PathVariable String userId) {
         return notificationService.getUserNotifications(userId);

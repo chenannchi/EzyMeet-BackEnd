@@ -70,17 +70,13 @@ public class PlatformNotificationServiceImpl implements NotificationService {
         }
         return notifications;
     }
-//
-//    @Override
-//    public void replyInvitation(String userId, String meetingId, PlatformNotification.Status status) {
-//        List<PlatformNotification> notifications = notificationRepository.getAllNotificationByUserId(userId);
-//        for (PlatformNotification notification : notifications) {
-//            if (notification.getMeetingId().equals(meetingId) && notification.getStatus() == PlatformNotification.Status.PENDING) {
-//                notification.setStatus(status);
-//                notificationRepository.replyInvitation(notification.getId(), status == PlatformNotification.Status.REPLIED);
-//                break;
-//            }
-//        }
-//    }
+
+    @Override
+    public void replyInvitation(String notificationId, PlatformNotification.Status status) {
+        if (status == null) {
+            throw new IllegalArgumentException("Status cannot be null");
+        }
+        notificationRepository.replyInvitation(notificationId, status);
+    }
 
 }
