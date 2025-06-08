@@ -95,4 +95,25 @@ public class MeetingParticipantRepository {
         }
     }
 
+    public MeetingParticipant findByMeetingIdAndUserId(String meetingId, String userId) {
+        try {
+            List<MeetingParticipant> participants = firestore.collection(COLLECTION_NAME)
+                    .whereEqualTo("meetingId", meetingId)
+                    .whereEqualTo("userId", userId)
+                    .get()
+                    .get()
+                    .getDocuments()
+                    .stream()
+                    .map(doc -> {
+                        MeetingParticipant participant = doc.toObject(MeetingParticipant.class);
+                        participant.setId(doc.getId());
+                        return participant;
+                    })
+                    .collect(Collectors.toList());
+            return participants.isEmpty() ? null : participants.get(0);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to query meeting participant by meetingId and userId", e);
+        }
+    }
+
 }

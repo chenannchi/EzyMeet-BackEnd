@@ -2,14 +2,12 @@ package EzyMeet.EzyMeet.impl;
 
 import EzyMeet.EzyMeet.dto.*;
 import EzyMeet.EzyMeet.exception.TimeSlotConflictException;
-import EzyMeet.EzyMeet.model.Meeting;
-import EzyMeet.EzyMeet.model.MeetingParticipant;
-import EzyMeet.EzyMeet.model.TimeSlot;
-import EzyMeet.EzyMeet.model.User;
+import EzyMeet.EzyMeet.model.*;
 import EzyMeet.EzyMeet.repository.MeetingParticipantRepository;
 import EzyMeet.EzyMeet.repository.MeetingRepository;
 import EzyMeet.EzyMeet.repository.UserRepository;
 import EzyMeet.EzyMeet.service.MeetingService;
+import EzyMeet.EzyMeet.service.NotificationService;
 import com.google.cloud.spring.data.firestore.FirestoreReactiveOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,13 +22,20 @@ public class MeetingServiceImpl implements MeetingService {
     private final MeetingRepository meetingRepository;
     private final MeetingParticipantRepository meetingParticipantRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     @Autowired
-    public MeetingServiceImpl(MeetingRepository meetingRepository, MeetingParticipantRepository meetingParticipantRepository, UserRepository userRepository) {
+    public MeetingServiceImpl(MeetingRepository meetingRepository, MeetingParticipantRepository meetingParticipantRepository, UserRepository userRepository, NotificationService notificationService) {
         this.meetingRepository = meetingRepository;
         this.meetingParticipantRepository = meetingParticipantRepository;
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
+
+//    private void sendMeetingNotification(Meeting meeting, List<String> participantUserIds) {
+//        String message = "Meeting \"" + meeting.getTitle() + "\" has been scheduled/updated.";
+//        notificationService.notifyParticipants(participantUserIds, message);
+//    }
 
     public ResponseMeetingDto createMeeting(RequestCreateMeetingDto requestDto) {
         List<TimeSlot> userMeetingTimeSlots = getUserMeetingTimeSlots(requestDto.getHost());
@@ -56,7 +61,7 @@ public class MeetingServiceImpl implements MeetingService {
                 MeetingParticipant participant = new MeetingParticipant();
                 participant.setMeetingId(savedMeeting.getId());
                 participant.setUserId(participantDto.getUserId());
-                participant.setStatus(participantDto.getStatus());
+                participant.setStatus(MeetingParticipant.Status.valueOf("INVITED"));
 
                 MeetingParticipant savedParticipant = meetingParticipantRepository.create(participant);
 
@@ -64,6 +69,25 @@ public class MeetingServiceImpl implements MeetingService {
                         .userId(savedParticipant.getUserId())
                         .status(savedParticipant.getStatus())
                         .build());
+            }
+        }
+
+//        sendMeetingNotification(savedMeeting, requestDto.getParticipants());
+
+
+        if( requestDto.getParticipants() != null && !requestDto.getParticipants().isEmpty()) {
+
+            for (String participantId : requestDto.getParticipants().stream()
+                    .map(RequestCreateMeetingDto.RequestParticipantDto::getUserId)
+                    .toList()) {
+                PlatformNotification notification = new PlatformNotification();
+                notification.setTitle(savedMeeting.getTitle());
+                notification.setRecipientId(participantId);
+                notification.setMeetingId(savedMeeting.getId());
+                notification.setStatus(PlatformNotification.Status.PENDING);
+                notification.setNotificationType(PlatformNotification.NotificationType.INVITATION); // or UPDATED
+
+                notificationService.createNotification(notification);
             }
         }
 
@@ -209,6 +233,21 @@ public class MeetingServiceImpl implements MeetingService {
                     .collect(Collectors.toList());
         }
 
+        if( requestUpdateDto.getParticipants() != null && !requestUpdateDto.getParticipants().isEmpty()) {
+
+            for (String participantId : requestUpdateDto.getParticipants().stream()
+                    .map(RequestUpdateMeetingDto.RequestParticipantDto::getUserId)
+                    .toList()) {
+                PlatformNotification notification = new PlatformNotification();
+                notification.setTitle(savedMeeting.getTitle());
+                notification.setRecipientId(participantId);
+                notification.setMeetingId(savedMeeting.getId());
+                notification.setStatus(null);
+                notification.setNotificationType(PlatformNotification.NotificationType.UPDATED); // or INVITATION
+                notificationService.createNotification(notification);
+
+            }
+        }
 
         return ResponseMeetingDto.builder()
                 .id(savedMeeting.getId())
