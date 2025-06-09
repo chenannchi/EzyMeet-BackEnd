@@ -68,6 +68,7 @@ public class PlatformNotificationServiceImpl implements NotificationService {
         if (notifications == null) {
             return Collections.emptyList();
         }
+        notifications.sort(Comparator.comparing(PlatformNotification::getCreatedAt, Comparator.nullsLast(Date::compareTo)).reversed());
         return notifications;
     }
 

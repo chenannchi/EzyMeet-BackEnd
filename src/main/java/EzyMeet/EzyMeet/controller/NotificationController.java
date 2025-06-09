@@ -11,8 +11,11 @@ import java.util.List;
 @RestController
 @RequestMapping("/notifications")
 public class NotificationController {
-    @Autowired
-    private NotificationService notificationService;
+    private final NotificationService notificationService;
+
+    public NotificationController(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
 
     @PostMapping("/replyInvitation")
     public void replyInvitation(@RequestBody RequestReplyInvitationDTO request) {
