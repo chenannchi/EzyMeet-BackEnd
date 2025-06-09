@@ -21,6 +21,7 @@ public class ResponseMeetingInfoDto {
     private String description;
     private String host;
     private String meetingRecord;
+    private List<ResponseMeetingInfoDto.ResponseAgendaItemDto> agendaItems;
     private List<ResponseMeetingInfoDto.ResponseParticipantDto> invitedParticipants;
     private List<ResponseMeetingInfoDto.ResponseParticipantDto> acceptedParticipants;
     private List<ResponseMeetingInfoDto.ResponseParticipantDto> declinedParticipants;
@@ -34,5 +35,16 @@ public class ResponseMeetingInfoDto {
         private String userId;
         private String email;
         private String name;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ResponseAgendaItemDto {
+        private String topic;
+        private String startTime;
+        private String endTime;
     }
 }

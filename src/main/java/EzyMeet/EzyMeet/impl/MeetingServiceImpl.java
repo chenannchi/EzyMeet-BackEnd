@@ -165,6 +165,17 @@ public class MeetingServiceImpl implements MeetingService {
             }
         }
 
+        List<ResponseMeetingInfoDto.ResponseAgendaItemDto> agendaItemDtos =
+                meeting.getAgendaItems() != null ?
+                        meeting.getAgendaItems().stream()
+                                .map(item -> ResponseMeetingInfoDto.ResponseAgendaItemDto.builder()
+                                        .topic(item.getTopic())
+                                        .startTime(item.getStartTime())
+                                        .endTime(item.getEndTime())
+                                        .build())
+                                .toList() :
+                        new ArrayList<>();
+
         return ResponseMeetingInfoDto.builder()
                 .id(meeting.getId())
                 .title(meeting.getTitle())
@@ -175,6 +186,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .description(meeting.getDescription())
                 .host(meeting.getHost())
                 .meetingRecord(meeting.getMeetingRecord())
+                .agendaItems(agendaItemDtos)
                 .invitedParticipants(invited)
                 .acceptedParticipants(accepted)
                 .declinedParticipants(declined)
