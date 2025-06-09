@@ -1,5 +1,6 @@
 package EzyMeet.EzyMeet.dto;
 
+import EzyMeet.EzyMeet.model.AgendaItem;
 import EzyMeet.EzyMeet.model.MeetingParticipant;
 import EzyMeet.EzyMeet.model.TimeSlot;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import java.time.LocalTime;
 import java.util.List;
 
 @Getter
@@ -22,6 +24,7 @@ public class RequestCreateMeetingDto {
     private String description;
     private String host;
     private List<RequestParticipantDto> participants;
+    private List<RequestAgendaItemDto> agendaItems;
 
     @Getter
     @Setter
@@ -30,5 +33,15 @@ public class RequestCreateMeetingDto {
     public static class RequestParticipantDto {
         private String userId;
         private MeetingParticipant.Status status;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RequestAgendaItemDto {
+        private String topic;
+        private String startTime;
+        private String endTime;
     }
 }

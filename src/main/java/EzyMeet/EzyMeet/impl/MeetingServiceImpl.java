@@ -2,10 +2,7 @@ package EzyMeet.EzyMeet.impl;
 
 import EzyMeet.EzyMeet.dto.*;
 import EzyMeet.EzyMeet.exception.TimeSlotConflictException;
-import EzyMeet.EzyMeet.model.Meeting;
-import EzyMeet.EzyMeet.model.MeetingParticipant;
-import EzyMeet.EzyMeet.model.TimeSlot;
-import EzyMeet.EzyMeet.model.User;
+import EzyMeet.EzyMeet.model.*;
 import EzyMeet.EzyMeet.repository.MeetingParticipantRepository;
 import EzyMeet.EzyMeet.repository.MeetingRepository;
 import EzyMeet.EzyMeet.repository.UserRepository;
@@ -14,6 +11,7 @@ import com.google.cloud.spring.data.firestore.FirestoreReactiveOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -48,6 +46,32 @@ public class MeetingServiceImpl implements MeetingService {
         meeting.setHost(requestDto.getHost());
         meeting.setMeetingRecord("");
 
+
+        // process agendaItem
+        List<ResponseMeetingDto.ResponseAgendaItemDto> agendaItemResponses = new ArrayList<>();
+        if(requestDto.getAgendaItems() != null) {
+            if(meeting.getAgendaItems() == null) {
+                meeting.setAgendaItems((new ArrayList<>()));
+            }
+
+            for (RequestCreateMeetingDto.RequestAgendaItemDto agendaItemDto : requestDto.getAgendaItems()) {
+                String topic = agendaItemDto.getTopic();
+                String startTime = agendaItemDto.getStartTime();
+                String endTime = agendaItemDto.getEndTime();
+
+                AgendaItem agendaItem = new AgendaItem(startTime, endTime, topic);
+                meeting.getAgendaItems().add(agendaItem);
+
+                ResponseMeetingDto.ResponseAgendaItemDto responseAgendaItem = ResponseMeetingDto.ResponseAgendaItemDto.builder()
+                        .topic(topic)
+                        .startTime(startTime)
+                        .endTime(endTime)
+                        .build();
+
+                agendaItemResponses.add(responseAgendaItem);
+          }
+        }
+
         Meeting savedMeeting = meetingRepository.create(meeting);
 
         List<ResponseMeetingDto.ResponseParticipantDto> participantResponses = new ArrayList<>();
@@ -66,7 +90,6 @@ public class MeetingServiceImpl implements MeetingService {
                         .build());
             }
         }
-
         return ResponseMeetingDto.builder()
                 .id(savedMeeting.getId())
                 .title(savedMeeting.getTitle())
@@ -78,6 +101,7 @@ public class MeetingServiceImpl implements MeetingService {
                 .host(savedMeeting.getHost())
                 .participants(participantResponses)
                 .meetingRecord(savedMeeting.getMeetingRecord())
+                .agendaItems(agendaItemResponses)
                 .build();
     }
 

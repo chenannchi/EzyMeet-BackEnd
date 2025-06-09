@@ -26,6 +26,7 @@ public class ResponseMeetingDto {
     private String host;
     private List<ResponseParticipantDto> participants;
     private String meetingRecord;
+    private List<ResponseAgendaItemDto> agendaItems;
 
     @Getter
     @Setter
@@ -35,5 +36,16 @@ public class ResponseMeetingDto {
     public static class ResponseParticipantDto {
         private String userId;
         private MeetingParticipant.Status status;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class ResponseAgendaItemDto {
+        private String topic;
+        private String startTime;
+        private String endTime;
     }
 }

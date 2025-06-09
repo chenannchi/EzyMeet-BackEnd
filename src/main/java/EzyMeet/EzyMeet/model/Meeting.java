@@ -16,4 +16,5 @@ public class Meeting {
     private String description;
     private String host;
     private String meetingRecord;
+    private List<AgendaItem> agendaItems;
 }
