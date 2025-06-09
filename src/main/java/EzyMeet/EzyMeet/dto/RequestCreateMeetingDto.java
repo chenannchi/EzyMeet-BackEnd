@@ -32,7 +32,6 @@ public class RequestCreateMeetingDto {
     @AllArgsConstructor
     public static class RequestParticipantDto {
         private String userId;
-        private MeetingParticipant.Status status;
     }
 
     @Getter
