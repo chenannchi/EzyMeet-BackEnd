@@ -12,9 +12,7 @@ import com.google.cloud.spring.data.firestore.FirestoreReactiveOperations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalTime;
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service("MeetingService")
@@ -53,9 +51,7 @@ public class MeetingServiceImpl implements MeetingService {
         // process agendaItem
         List<ResponseMeetingDto.ResponseAgendaItemDto> agendaItemResponses = new ArrayList<>();
         if(requestDto.getAgendaItems() != null) {
-            if(meeting.getAgendaItems() == null) {
-                meeting.setAgendaItems((new ArrayList<>()));
-            }
+            meeting.setAgendaItems((new ArrayList<>()));
 
             for (RequestCreateMeetingDto.RequestAgendaItemDto agendaItemDto : requestDto.getAgendaItems()) {
                 String topic = agendaItemDto.getTopic();
@@ -244,23 +240,6 @@ public class MeetingServiceImpl implements MeetingService {
         );
         Meeting savedMeeting = meetingRepository.update(meetingId, updatedMeeting);
 
-//        List<RequestUpdateMeetingDto.RequestParticipantDto> participantDtos = new ArrayList<>();
-//        if (requestUpdateDto.getParticipants() != null) {
-//            List<MeetingParticipant> participants = requestUpdateDto.getParticipants().stream()
-//                    .map(dto -> {
-//                        MeetingParticipant participant = new MeetingParticipant();
-//                        participant.setId(dto.getId());
-//                        participant.setMeetingId(meetingId);
-//                        participant.setUserId(dto.getUserId());
-//                        participant.setStatus(dto.getStatus());
-//                        return participant;
-//                    })
-//                    .collect(Collectors.toList());
-//
-//            syncParticipants(meetingId, participants);
-//
-//            participantDtos = requestUpdateDto.getParticipants();
-//        }
         List<ResponseMeetingDto.ResponseParticipantDto> participantDtos = new ArrayList<>();
         if (requestUpdateDto.getParticipants() != null) {
             participantDtos = requestUpdateDto.getParticipants().stream()
@@ -287,6 +266,8 @@ public class MeetingServiceImpl implements MeetingService {
             }
         }
 
+
+
         return ResponseMeetingDto.builder()
                 .id(savedMeeting.getId())
                 .title(savedMeeting.getTitle())
@@ -298,6 +279,17 @@ public class MeetingServiceImpl implements MeetingService {
                 .host(savedMeeting.getHost())
                 .participants(participantDtos)
                 .meetingRecord(savedMeeting.getMeetingRecord())
+                .agendaItems(
+                        savedMeeting.getAgendaItems() != null ?
+                                savedMeeting.getAgendaItems().stream()
+                                        .map(item -> ResponseMeetingDto.ResponseAgendaItemDto.builder()
+                                                .topic(item.getTopic())
+                                                .startTime(item.getStartTime())
+                                                .endTime(item.getEndTime())
+                                                .build())
+                                        .collect(Collectors.toList()) :
+                                new ArrayList<>()
+                )
                 .build();
     }
 
@@ -308,40 +300,6 @@ public class MeetingServiceImpl implements MeetingService {
                 .title(deletedMeeting.getTitle())
                 .build();
     }
-
-//    private void syncParticipants(String meetingId, List<MeetingParticipant> newParticipants) {
-//        List<MeetingParticipant> originalParticipants = meetingParticipantRepository.findByMeetingId(meetingId);
-//        Map<String, MeetingParticipant> originalParticipantMap = originalParticipants.stream()
-//                .collect(Collectors.toMap(MeetingParticipant::getUserId, Function.identity()));
-//
-//        Set<String> incomingUserIds = newParticipants == null
-//                ? Collections.emptySet()
-//                : newParticipants.stream()
-//                .map(MeetingParticipant::getUserId)
-//                .collect(Collectors.toSet());
-//
-//        newParticipants.stream()
-//                .filter(p -> !originalParticipantMap.containsKey(p.getUserId()))
-//                .forEach(p -> {
-//                    p.setMeetingId(meetingId);
-//                    p.setId(null);
-//                    meetingParticipantRepository.create(p);
-//                });
-//
-//        originalParticipants.stream()
-//                .filter(p -> !incomingUserIds.contains(p.getUserId()))
-//                .forEach(p -> meetingParticipantRepository.delete(p.getId()));
-//
-//        newParticipants.stream()
-//                .filter(p -> originalParticipantMap.containsKey(p.getUserId()))
-//                .filter(p -> !Objects.equals(originalParticipantMap.get(p.getUserId()).getStatus(), p.getStatus()))
-//                .forEach(p -> {
-//                    MeetingParticipant existingParticipant = originalParticipantMap.get(p.getUserId());
-//                    p.setId(existingParticipant.getId());
-//                    p.setMeetingId(meetingId);
-//                    meetingParticipantRepository.update(existingParticipant.getId(), p);
-//                });
-//    }
 
     private ResponseMeetingDto convertMeetingToDto(Meeting meeting) {
         List<MeetingParticipant> participants =

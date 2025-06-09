@@ -2,10 +2,7 @@ package EzyMeet.EzyMeet.impl;
 
 import EzyMeet.EzyMeet.dto.*;
 import EzyMeet.EzyMeet.exception.TimeSlotConflictException;
-import EzyMeet.EzyMeet.model.Meeting;
-import EzyMeet.EzyMeet.model.MeetingParticipant;
-import EzyMeet.EzyMeet.model.TimeSlot;
-import EzyMeet.EzyMeet.model.User;
+import EzyMeet.EzyMeet.model.*;
 import EzyMeet.EzyMeet.repository.MeetingParticipantRepository;
 import EzyMeet.EzyMeet.repository.MeetingRepository;
 import EzyMeet.EzyMeet.repository.UserRepository;
@@ -54,10 +51,17 @@ public class MeetingServiceImplTest {
         requestDto.setDescription("Test Description");
         requestDto.setHost("userHost");
 
+        List<RequestCreateMeetingDto.RequestAgendaItemDto> agendaItems = new ArrayList<>();
+        RequestCreateMeetingDto.RequestAgendaItemDto agendaItem = new RequestCreateMeetingDto.RequestAgendaItemDto();
+        agendaItem.setTopic("Test Topic");
+        agendaItem.setStartTime("18:00");
+        agendaItem.setEndTime("19:00");
+        agendaItems.add(agendaItem);
+        requestDto.setAgendaItems(agendaItems);
+
         List<RequestCreateMeetingDto.RequestParticipantDto> participants = new ArrayList<>();
         RequestCreateMeetingDto.RequestParticipantDto participant = new RequestCreateMeetingDto.RequestParticipantDto();
         participant.setUserId("user456");
-        participant.setStatus(MeetingParticipant.Status.INVITED);
         participants.add(participant);
         requestDto.setParticipants(participants);
 
@@ -71,6 +75,11 @@ public class MeetingServiceImplTest {
         savedMeeting.setLink("https://test.com");
         savedMeeting.setDescription("Test Description");
         savedMeeting.setMeetingRecord("");
+
+        List<AgendaItem> savedAgendaItems = new ArrayList<>();
+        AgendaItem savedAgendaItem = new AgendaItem("18:00", "19:00", "Test Topic");
+        savedAgendaItems.add(savedAgendaItem);
+        savedMeeting.setAgendaItems(savedAgendaItems);
 
         MeetingParticipant savedParticipant = new MeetingParticipant();
         savedParticipant.setUserId("user456");
@@ -98,6 +107,10 @@ public class MeetingServiceImplTest {
         assertEquals("https://test.com", result.getLink());
         assertEquals("Test Description", result.getDescription());
         assertEquals("", result.getMeetingRecord());
+        assertEquals(1, result.getAgendaItems().size());
+        assertEquals("Test Topic", result.getAgendaItems().get(0).getTopic());
+        assertEquals("18:00", result.getAgendaItems().get(0).getStartTime());
+        assertEquals("19:00", result.getAgendaItems().get(0).getEndTime());
 
         verify(meetingRepository).create(any(Meeting.class));
         verify(meetingParticipantRepository).create(any(MeetingParticipant.class));
@@ -272,6 +285,12 @@ public void createMeetingTimeSlotConflict() {
         meeting.setHost("userHost");
         meeting.setMeetingRecord("Meeting notes");
 
+        List<AgendaItem> agendaItems = new ArrayList<>();
+        AgendaItem agendaItem = new AgendaItem("18:00", "19:00", "Test Topic");
+        agendaItems.add(agendaItem);
+        meeting.setAgendaItems(agendaItems);
+
+
         MeetingParticipant invitedParticipant = new MeetingParticipant();
         invitedParticipant.setId("participant1");
         invitedParticipant.setUserId("userInvited");
@@ -291,6 +310,8 @@ public void createMeetingTimeSlotConflict() {
         declinedParticipant.setStatus(MeetingParticipant.Status.DECLINED);
 
         List<MeetingParticipant> participants = List.of(acceptedParticipant, invitedParticipant, declinedParticipant);
+
+
 
         when(meetingRepository.findSingleMeetingById(meetingId)).thenReturn(meeting);
         when(meetingParticipantRepository.findByMeetingId(meetingId)).thenReturn(participants);
@@ -356,6 +377,11 @@ public void createMeetingTimeSlotConflict() {
         assertEquals("userHost", result.getHost());
         assertEquals("Meeting notes", result.getMeetingRecord());
 
+        assertEquals(1, result.getAgendaItems().size());
+        assertEquals("Test Topic", result.getAgendaItems().get(0).getTopic());
+        assertEquals("18:00", result.getAgendaItems().get(0).getStartTime());
+        assertEquals("19:00", result.getAgendaItems().get(0).getEndTime());
+
         assertEquals(1, result.getInvitedParticipants().size());
         assertEquals("userInvited", result.getInvitedParticipants().get(0).getUserId());
         assertEquals("invited@example.com", result.getInvitedParticipants().get(0).getEmail());
@@ -408,6 +434,11 @@ public void createMeetingTimeSlotConflict() {
         existingMeeting.setHost(userId);
         existingMeeting.setMeetingRecord("Original notes");
 
+        List<AgendaItem> originalAgendaItems = new ArrayList<>();
+        AgendaItem originalItem = new AgendaItem("18:00", "19:00", "Original Topic");
+        originalAgendaItems.add(originalItem);
+        existingMeeting.setAgendaItems(originalAgendaItems);
+
         RequestUpdateMeetingDto requestUpdateDto = new RequestUpdateMeetingDto();
         requestUpdateDto.setTitle("Updated Title");
         requestUpdateDto.setLabel("Updated Label");
@@ -417,6 +448,14 @@ public void createMeetingTimeSlotConflict() {
         requestUpdateDto.setDescription("Updated Description");
         requestUpdateDto.setHost(userId);
         requestUpdateDto.setMeetingRecord("Updated notes");
+
+        List<RequestUpdateMeetingDto.RequestAgendaItemDto> requestAgendaItems = new ArrayList<>();
+        RequestUpdateMeetingDto.RequestAgendaItemDto agendaItemDto = new RequestUpdateMeetingDto.RequestAgendaItemDto();
+        agendaItemDto.setTopic("Updated Topic");
+        agendaItemDto.setStartTime("18:30");
+        agendaItemDto.setEndTime("19:30");
+        requestAgendaItems.add(agendaItemDto);
+        requestUpdateDto.setAgendaItems(requestAgendaItems);
 
         RequestUpdateMeetingDto.RequestParticipantDto participantDto = new RequestUpdateMeetingDto.RequestParticipantDto();
         participantDto.setUserId("participant123");
@@ -434,13 +473,17 @@ public void createMeetingTimeSlotConflict() {
         updatedMeeting.setHost(userId);
         updatedMeeting.setMeetingRecord("Updated notes");
 
+        List<AgendaItem> updatedAgendaItems = new ArrayList<>();
+        AgendaItem updatedItem = new AgendaItem("18:30", "19:30", "Updated Topic");
+        updatedAgendaItems.add(updatedItem);
+        updatedMeeting.setAgendaItems(updatedAgendaItems);
+
         when(meetingRepository.findSingleMeetingById(meetingId)).thenReturn(existingMeeting);
         when(meetingRepository.update(eq(meetingId), any(Meeting.class))).thenReturn(updatedMeeting);
         when(meetingRepository.findMeetingsById(anyList())).thenReturn(Collections.emptyList());
         when(meetingRepository.findMeetingsByHost(userId)).thenReturn(Collections.emptyList());
 
         ResponseMeetingDto result = meetingService.updateMeeting(meetingId, requestUpdateDto);
-
         assertNotNull(result);
         assertEquals(meetingId, result.getId());
         assertEquals("Updated Title", result.getTitle());
@@ -454,6 +497,12 @@ public void createMeetingTimeSlotConflict() {
         assertEquals(1, result.getParticipants().size());
         assertEquals("participant123", result.getParticipants().get(0).getUserId());
         assertEquals(MeetingParticipant.Status.ACCEPTED, result.getParticipants().get(0).getStatus());
+        assertEquals(1, result.getAgendaItems().size());
+        assertEquals("Updated Topic", result.getAgendaItems().get(0).getTopic());
+        assertEquals("18:30", result.getAgendaItems().get(0).getStartTime());
+        assertEquals("19:30", result.getAgendaItems().get(0).getEndTime());
+
+
 
         verify(meetingRepository).findSingleMeetingById(meetingId);
         verify(meetingRepository).update(eq(meetingId), any(Meeting.class));
@@ -644,6 +693,11 @@ public void createMeetingTimeSlotConflict() {
 
         verify(meetingParticipantRepository).deleteByMeetingId(meetingId);
         verify(meetingRepository).delete(meetingId);
+    }
+
+    @Test
+    public void createEmptyAgendaItems() {
+
     }
 
 
