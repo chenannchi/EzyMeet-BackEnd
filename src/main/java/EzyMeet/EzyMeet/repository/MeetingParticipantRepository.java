@@ -120,7 +120,6 @@ public class MeetingParticipantRepository {
         try {
             MeetingParticipant participant = findByMeetingIdAndUserId(meetingId, userId);
             if (participant != null) {
-
                 participant.setStatus(status);
                 DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(participant.getId());
                 docRef.set(participant, SetOptions.merge());
