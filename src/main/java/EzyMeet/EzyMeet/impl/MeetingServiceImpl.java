@@ -94,6 +94,22 @@ public class MeetingServiceImpl implements MeetingService {
             }
         }
 
+        if( requestDto.getParticipants() != null && !requestDto.getParticipants().isEmpty()) {
+
+            for (String participantId : requestDto.getParticipants().stream()
+                    .map(RequestCreateMeetingDto.RequestParticipantDto::getUserId)
+                    .toList()) {
+                PlatformNotification notification = new PlatformNotification();
+                notification.setTitle(savedMeeting.getTitle());
+                notification.setRecipientId(participantId);
+                notification.setMeetingId(savedMeeting.getId());
+                notification.setStatus(PlatformNotification.Status.PENDING);
+                notification.setNotificationType(PlatformNotification.NotificationType.INVITATION); // or UPDATED
+
+                notificationService.createNotification(notification);
+            }
+        }
+
         return ResponseMeetingDto.builder()
                 .id(savedMeeting.getId())
                 .title(savedMeeting.getTitle())
