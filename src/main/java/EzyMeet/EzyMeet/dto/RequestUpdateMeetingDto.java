@@ -2,10 +2,7 @@ package EzyMeet.EzyMeet.dto;
 
 import EzyMeet.EzyMeet.model.MeetingParticipant.Status;
 import EzyMeet.EzyMeet.model.TimeSlot;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
@@ -23,6 +20,7 @@ public class RequestUpdateMeetingDto {
     private String host;
     private String meetingRecord;
     private List<RequestParticipantDto> participants;
+    private List<RequestAgendaItemDto> agendaItems;
 
     @Data
     @Builder
@@ -32,5 +30,15 @@ public class RequestUpdateMeetingDto {
         private String id; // Can be null for new participants
         private String userId;
         private Status status;
+    }
+
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class RequestAgendaItemDto {
+        private String topic;
+        private String startTime;
+        private String endTime;
     }
 }

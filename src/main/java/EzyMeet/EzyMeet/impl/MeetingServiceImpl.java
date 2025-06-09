@@ -219,7 +219,13 @@ public class MeetingServiceImpl implements MeetingService {
         updatedMeeting.setDescription(requestUpdateDto.getDescription());
         updatedMeeting.setHost(requestUpdateDto.getHost());
         updatedMeeting.setMeetingRecord(requestUpdateDto.getMeetingRecord());
-
+        updatedMeeting.setAgendaItems(
+                requestUpdateDto.getAgendaItems() != null ?
+                        requestUpdateDto.getAgendaItems().stream()
+                                .map(item -> new AgendaItem(item.getStartTime(), item.getEndTime(), item.getTopic()))
+                                .collect(Collectors.toList()) :
+                        existingMeeting.getAgendaItems()
+        );
         Meeting savedMeeting = meetingRepository.update(meetingId, updatedMeeting);
 
 //        List<RequestUpdateMeetingDto.RequestParticipantDto> participantDtos = new ArrayList<>();
@@ -286,6 +292,40 @@ public class MeetingServiceImpl implements MeetingService {
                 .title(deletedMeeting.getTitle())
                 .build();
     }
+
+//    private void syncParticipants(String meetingId, List<MeetingParticipant> newParticipants) {
+//        List<MeetingParticipant> originalParticipants = meetingParticipantRepository.findByMeetingId(meetingId);
+//        Map<String, MeetingParticipant> originalParticipantMap = originalParticipants.stream()
+//                .collect(Collectors.toMap(MeetingParticipant::getUserId, Function.identity()));
+//
+//        Set<String> incomingUserIds = newParticipants == null
+//                ? Collections.emptySet()
+//                : newParticipants.stream()
+//                .map(MeetingParticipant::getUserId)
+//                .collect(Collectors.toSet());
+//
+//        newParticipants.stream()
+//                .filter(p -> !originalParticipantMap.containsKey(p.getUserId()))
+//                .forEach(p -> {
+//                    p.setMeetingId(meetingId);
+//                    p.setId(null);
+//                    meetingParticipantRepository.create(p);
+//                });
+//
+//        originalParticipants.stream()
+//                .filter(p -> !incomingUserIds.contains(p.getUserId()))
+//                .forEach(p -> meetingParticipantRepository.delete(p.getId()));
+//
+//        newParticipants.stream()
+//                .filter(p -> originalParticipantMap.containsKey(p.getUserId()))
+//                .filter(p -> !Objects.equals(originalParticipantMap.get(p.getUserId()).getStatus(), p.getStatus()))
+//                .forEach(p -> {
+//                    MeetingParticipant existingParticipant = originalParticipantMap.get(p.getUserId());
+//                    p.setId(existingParticipant.getId());
+//                    p.setMeetingId(meetingId);
+//                    meetingParticipantRepository.update(existingParticipant.getId(), p);
+//                });
+//    }
 
     private ResponseMeetingDto convertMeetingToDto(Meeting meeting) {
         List<MeetingParticipant> participants =
