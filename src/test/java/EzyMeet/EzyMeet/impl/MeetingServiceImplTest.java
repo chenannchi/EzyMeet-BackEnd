@@ -9,6 +9,7 @@ import EzyMeet.EzyMeet.model.User;
 import EzyMeet.EzyMeet.repository.MeetingParticipantRepository;
 import EzyMeet.EzyMeet.repository.MeetingRepository;
 import EzyMeet.EzyMeet.repository.UserRepository;
+import EzyMeet.EzyMeet.service.NotificationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,6 +33,8 @@ public class MeetingServiceImplTest {
     private MeetingParticipantRepository meetingParticipantRepository;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private NotificationService notificationService;
     @InjectMocks
     private MeetingServiceImpl meetingService;
 

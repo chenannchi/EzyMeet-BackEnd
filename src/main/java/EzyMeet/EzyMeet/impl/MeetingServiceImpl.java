@@ -32,11 +32,6 @@ public class MeetingServiceImpl implements MeetingService {
         this.notificationService = notificationService;
     }
 
-//    private void sendMeetingNotification(Meeting meeting, List<String> participantUserIds) {
-//        String message = "Meeting \"" + meeting.getTitle() + "\" has been scheduled/updated.";
-//        notificationService.notifyParticipants(participantUserIds, message);
-//    }
-
     public ResponseMeetingDto createMeeting(RequestCreateMeetingDto requestDto) {
         List<TimeSlot> userMeetingTimeSlots = getUserMeetingTimeSlots(requestDto.getHost());
         if (isTimeSlotConflict(requestDto.getTimeslot(), userMeetingTimeSlots)) {
@@ -270,40 +265,6 @@ public class MeetingServiceImpl implements MeetingService {
                 .title(deletedMeeting.getTitle())
                 .build();
     }
-
-//    private void syncParticipants(String meetingId, List<MeetingParticipant> newParticipants) {
-//        List<MeetingParticipant> originalParticipants = meetingParticipantRepository.findByMeetingId(meetingId);
-//        Map<String, MeetingParticipant> originalParticipantMap = originalParticipants.stream()
-//                .collect(Collectors.toMap(MeetingParticipant::getUserId, Function.identity()));
-//
-//        Set<String> incomingUserIds = newParticipants == null
-//                ? Collections.emptySet()
-//                : newParticipants.stream()
-//                .map(MeetingParticipant::getUserId)
-//                .collect(Collectors.toSet());
-//
-//        newParticipants.stream()
-//                .filter(p -> !originalParticipantMap.containsKey(p.getUserId()))
-//                .forEach(p -> {
-//                    p.setMeetingId(meetingId);
-//                    p.setId(null);
-//                    meetingParticipantRepository.create(p);
-//                });
-//
-//        originalParticipants.stream()
-//                .filter(p -> !incomingUserIds.contains(p.getUserId()))
-//                .forEach(p -> meetingParticipantRepository.delete(p.getId()));
-//
-//        newParticipants.stream()
-//                .filter(p -> originalParticipantMap.containsKey(p.getUserId()))
-//                .filter(p -> !Objects.equals(originalParticipantMap.get(p.getUserId()).getStatus(), p.getStatus()))
-//                .forEach(p -> {
-//                    MeetingParticipant existingParticipant = originalParticipantMap.get(p.getUserId());
-//                    p.setId(existingParticipant.getId());
-//                    p.setMeetingId(meetingId);
-//                    meetingParticipantRepository.update(existingParticipant.getId(), p);
-//                });
-//    }
 
     private ResponseMeetingDto convertMeetingToDto(Meeting meeting) {
         List<MeetingParticipant> participants =
