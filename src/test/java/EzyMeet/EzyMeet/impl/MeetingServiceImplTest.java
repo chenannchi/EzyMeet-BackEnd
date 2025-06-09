@@ -695,12 +695,6 @@ public void createMeetingTimeSlotConflict() {
         verify(meetingRepository).delete(meetingId);
     }
 
-    @Test
-    public void createEmptyAgendaItems() {
-
-    }
-
-
     private TimeSlot convertTimeSlot(String startTimeStr, String endTimeStr) {
         ZonedDateTime startZdt = ZonedDateTime.parse(startTimeStr);
         ZonedDateTime endZdt = ZonedDateTime.parse(endTimeStr);
