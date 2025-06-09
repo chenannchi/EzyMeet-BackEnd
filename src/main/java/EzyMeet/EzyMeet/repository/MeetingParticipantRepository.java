@@ -109,10 +109,26 @@ public class MeetingParticipantRepository {
                         participant.setId(doc.getId());
                         return participant;
                     })
-                    .collect(Collectors.toList());
+                    .toList();
             return participants.isEmpty() ? null : participants.get(0);
         } catch (Exception e) {
             throw new RuntimeException("Failed to query meeting participant by meetingId and userId", e);
+        }
+    }
+
+    public void updateStatus(String meetingId, String userId, MeetingParticipant.Status status) {
+        try {
+            MeetingParticipant participant = findByMeetingIdAndUserId(meetingId, userId);
+            if (participant != null) {
+
+                participant.setStatus(status);
+                DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(participant.getId());
+                docRef.set(participant, SetOptions.merge());
+            } else {
+                throw new RuntimeException("Participant not found for meetingId: " + meetingId + " and userId: " + userId);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to update participant status", e);
         }
     }
 

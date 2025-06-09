@@ -44,7 +44,25 @@ public class NotificationRepository {
         }
     }
 
-        public void replyInvitation(String notificationId, PlatformNotification.Status status) {
+    public PlatformNotification getNotificationById(String notificationId) {
+        if (notificationId == null) {
+            throw new IllegalArgumentException("Notification ID must not be null");
+        }
+        try {
+            DocumentReference docRef = firestore.collection(COLLECTION_NAME).document(notificationId);
+            ApiFuture<DocumentSnapshot> future = docRef.get();
+            DocumentSnapshot document = future.get();
+            if (document.exists()) {
+                return document.toObject(PlatformNotification.class);
+            } else {
+                return new PlatformNotification();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Failed to fetch notification by ID: " + notificationId, e);
+        }
+    }
+
+    public void replyInvitation(String notificationId, PlatformNotification.Status status) {
         if (notificationId == null || status == null) {
             throw new IllegalArgumentException("Notification ID and status must not be null");
         }

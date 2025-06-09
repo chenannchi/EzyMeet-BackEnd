@@ -78,6 +78,20 @@ public class PlatformNotificationServiceImpl implements NotificationService {
             throw new IllegalArgumentException("Status cannot be null");
         }
         notificationRepository.replyInvitation(notificationId, status);
+
+        PlatformNotification notification = notificationRepository.getNotificationById(notificationId);
+        if (notification != null) {
+            MeetingParticipant.Status participantStatus;
+            if (status == PlatformNotification.Status.ACCEPTED) {
+                participantStatus = MeetingParticipant.Status.ACCEPTED;
+            } else if (status == PlatformNotification.Status.REJECTED) {
+                participantStatus = MeetingParticipant.Status.DECLINED;
+            } else {
+                participantStatus = MeetingParticipant.Status.INVITED;
+            }
+            meetingParticipantRepository.updateStatus(notification.getMeetingId(), notification.getRecipientId(), participantStatus);
+        }
+
     }
 
 }
