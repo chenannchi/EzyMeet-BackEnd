@@ -115,34 +115,35 @@ public class MeetingServiceImplTest {
         verify(meetingRepository).create(any(Meeting.class));
         verify(meetingParticipantRepository).create(any(MeetingParticipant.class));
     }
-@Test
-public void createMeetingTimeSlotConflict() {
-    String startTimeStr = "2025-12-15T18:00:00.000+00:00";
-    String endTimeStr = "2025-12-15T20:00:00.000+00:00";
-    TimeSlot newTimeSlot = convertTimeSlot(startTimeStr, endTimeStr);
 
-    RequestCreateMeetingDto requestDto = new RequestCreateMeetingDto();
-    requestDto.setTitle("Conflicting Meeting");
-    requestDto.setLabel("Conflict");
-    requestDto.setTimeslot(newTimeSlot);
-    requestDto.setLocation("Conflict Location");
-    requestDto.setLink("https://conflict.com");
-    requestDto.setDescription("This meeting will conflict");
-    requestDto.setHost("userHost");
+    @Test
+    public void createMeetingTimeSlotConflict() {
+        String startTimeStr = "2025-12-15T18:00:00.000+00:00";
+        String endTimeStr = "2025-12-15T20:00:00.000+00:00";
+        TimeSlot newTimeSlot = convertTimeSlot(startTimeStr, endTimeStr);
 
-    TimeSlot existingTimeSlot = convertTimeSlot("2025-12-15T19:00:00.000+00:00", "2025-12-15T21:00:00.000+00:00");
-    Meeting existingMeeting = new Meeting();
-    existingMeeting.setId("existingMeeting123");
-    existingMeeting.setTimeslot(existingTimeSlot);
+        RequestCreateMeetingDto requestDto = new RequestCreateMeetingDto();
+        requestDto.setTitle("Conflicting Meeting");
+        requestDto.setLabel("Conflict");
+        requestDto.setTimeslot(newTimeSlot);
+        requestDto.setLocation("Conflict Location");
+        requestDto.setLink("https://conflict.com");
+        requestDto.setDescription("This meeting will conflict");
+        requestDto.setHost("userHost");
 
-    when(meetingRepository.findMeetingsByHost(anyString())).thenReturn(Collections.singletonList(existingMeeting));
-    when(meetingParticipantRepository.findByUserId(anyString())).thenReturn(Collections.emptyList());
+        TimeSlot existingTimeSlot = convertTimeSlot("2025-12-15T19:00:00.000+00:00", "2025-12-15T21:00:00.000+00:00");
+        Meeting existingMeeting = new Meeting();
+        existingMeeting.setId("existingMeeting123");
+        existingMeeting.setTimeslot(existingTimeSlot);
 
-    TimeSlotConflictException exception = assertThrows(TimeSlotConflictException.class, () -> {
-        meetingService.createMeeting(requestDto);
-    });
+        when(meetingRepository.findMeetingsByHost(anyString())).thenReturn(Collections.singletonList(existingMeeting));
+        when(meetingParticipantRepository.findByUserId(anyString())).thenReturn(Collections.emptyList());
 
-    assertEquals("The provided time slot conflicts with existing time slots.", exception.getMessage());
+        TimeSlotConflictException exception = assertThrows(TimeSlotConflictException.class, () -> {
+            meetingService.createMeeting(requestDto);
+        });
+
+        assertEquals("The provided time slot conflicts with existing time slots.", exception.getMessage());
 }
 
     @Test
