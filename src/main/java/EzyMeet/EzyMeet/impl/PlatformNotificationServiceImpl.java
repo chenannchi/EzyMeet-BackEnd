@@ -50,13 +50,11 @@ public class PlatformNotificationServiceImpl implements NotificationService {
 
         PlatformNotification notification = notificationRepository.getNotificationById(notificationId);
         if (notification != null) {
-            MeetingParticipant.Status participantStatus;
+            MeetingParticipant.Status participantStatus = MeetingParticipant.Status.INVITED;
             if (status == PlatformNotification.Status.ACCEPTED) {
                 participantStatus = MeetingParticipant.Status.ACCEPTED;
             } else if (status == PlatformNotification.Status.REJECTED) {
                 participantStatus = MeetingParticipant.Status.DECLINED;
-            } else {
-                participantStatus = MeetingParticipant.Status.INVITED;
             }
             meetingParticipantRepository.updateStatus(notification.getMeetingId(), notification.getRecipientId(), participantStatus);
         }
